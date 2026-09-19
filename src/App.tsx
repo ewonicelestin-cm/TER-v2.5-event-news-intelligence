@@ -113,8 +113,12 @@ function InstitutionalPage({ report }: { report: any }) { return <><PageHeader i
 function WatchlistPage({ assets }: { assets: MarketAsset[] }) {
   const [rows, setRows] = useState<any[]>([]);
   const [symbol, setSymbol] = useState("");
-  const load = () => fetch("/api/watchlist").then(r => r.json()).then(setRows).catch(() => setRows([]));
-  useEffect(() => { load(); }, []);
+  const load = () => {
+    fetch("/api/watchlist").then(r => r.json()).then(setRows).catch(() => setRows([]));
+  };
+  useEffect(() => {
+    load();
+  }, []);
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!symbol.trim()) return;
@@ -145,9 +149,26 @@ function WatchlistPage({ assets }: { assets: MarketAsset[] }) {
   </>;
 }
 function AlertsPage() {
-  const [rows,setRows]=useState<any[]>([]); const [rules,setRules]=useState<any[]>([]); const [symbol,setSymbol]=useState("*"); const [threshold,setThreshold]=useState("70");
-  const [ruleName,setRuleName]=useState("Nouvelle règle"); const [metric,setMetric]=useState("SIGNAL_SCORE"); const [operator,setOperator]=useState(">="); const [value,setValue]=useState("80"); const [logic,setLogic]=useState("ALL"); const [severity,setSeverity]=useState("MEDIUM"); const [cooldown,setCooldown]=useState("15");
-  const load=()=>{ fetch("/api/alerts").then(r=>r.json()).then(setRows).catch(()=>setRows([])); fetch("/api/automation/rules").then(r=>r.json()).then(setRules).catch(()=>setRules([])); }; useEffect(() => { load(); }, []);
+  const [rows, setRows] = useState<any[]>([]);
+  const [rules, setRules] = useState<any[]>([]);
+  const [symbol, setSymbol] = useState("*");
+  const [threshold, setThreshold] = useState("70");
+  const [ruleName, setRuleName] = useState("Nouvelle règle");
+  const [metric, setMetric] = useState("SIGNAL_SCORE");
+  const [operator, setOperator] = useState(">=");
+  const [value, setValue] = useState("80");
+  const [logic, setLogic] = useState("ALL");
+  const [severity, setSeverity] = useState("MEDIUM");
+  const [cooldown, setCooldown] = useState("15");
+
+  const load = () => {
+    fetch("/api/alerts").then(r => r.json()).then(setRows).catch(() => setRows([]));
+    fetch("/api/automation/rules").then(r => r.json()).then(setRules).catch(() => setRules([]));
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
   const add=async(e:React.FormEvent)=>{e.preventDefault(); await fetch("/api/alerts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({symbol,threshold:Number(threshold),direction:"ANY"})}); load();};
   const addRule=async(e:React.FormEvent)=>{e.preventDefault(); await fetch("/api/automation/rules",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:ruleName,symbol,logic,conditions:[{metric,operator,value:Number(value)}],severity,cooldownMinutes:Number(cooldown),enabled:true})}); load();};
   const toggle=async(r:any)=>{await fetch(`/api/automation/rules/${r.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({enabled:!r.enabled})});load();};
