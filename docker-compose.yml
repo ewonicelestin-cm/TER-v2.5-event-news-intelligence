@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ter
+      POSTGRES_PASSWORD: ter_dev_password
+      POSTGRES_DB: ter
+    ports:
+      - "5432:5432"
+    volumes:
+      - ter_pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  ter_pg:
