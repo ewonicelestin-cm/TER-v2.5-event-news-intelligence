@@ -366,20 +366,27 @@ function ObservabilityPage() {
 function IntelligenceHub() {
   const [global, setGlobal] = useState<any>(null);
   const [correlations, setCorrelations] = useState<any[]>([]);
+  const [gems, setGems] = useState<any[]>([]);
+
+  const loadGems = () => fetch("/api/intelligence/arcane-gems").then(r => r.json()).then(setGems);
 
   useEffect(() => {
     fetch("/api/intelligence/global").then(r => r.json()).then(setGlobal);
     fetch("/api/intelligence/correlations").then(r => r.json()).then(setCorrelations);
+    loadGems();
+    const t = setInterval(loadGems, 30000);
+    return () => clearInterval(t);
   }, []);
 
   return <>
-    <PageHeader icon={<BrainCircuit/>} title="Intelligence Hub v3.6" subtitle="Sentiment global, corrélations avancées et trajectoires prédictives."/>
+    <PageHeader icon={<BrainCircuit/>} title="Intelligence Hub v3.6" subtitle="Sentiment global, corrélations avancées et pépites informationnelles des arcanes du pouvoir."/>
     {global && <div className="metricTiles">
       <Stat label="Sentiment" value={global.overallSentiment}/>
       <Stat label="Bullish" value={`${global.bullishRatio}%`}/>
       <Stat label="Bearish" value={`${global.bearishRatio}%`}/>
       <Stat label="Alignement" value={global.marketAlignment}/>
     </div>}
+
     <div className="pageGrid">
       <PageCard title="Sentiment Global IA" subtitle="Agrégation en temps réel des stances de l'Ensemble v3.6.">
         <div className="scenarioGrid">
@@ -393,6 +400,28 @@ function IntelligenceHub() {
           </div>
         </div>
       </PageCard>
+
+      <PageCard title="Pépites Informationnelles (Power Arcana)" subtitle="Signaux faibles repérés par l'IA dans les communications officielles et officieuses.">
+        <div className="timeline">
+          {gems.length > 0 ? gems.map((g: any) => (
+            <div className="timelineItem" key={g.id}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                <small>{new Date(g.timestamp).toLocaleTimeString()} · {g.source}</small>
+                <Pill tone={g.importance === "HIGH" ? "down" : "warn"}>{g.importance}</Pill>
+              </div>
+              <strong>{g.title}</strong>
+              <p className="muted" style={{fontSize:'0.85rem', margin:'4px 0'}}>{g.body}</p>
+              <div style={{display:'flex', gap:'8px', marginTop:'4px'}}>
+                {g.isLeaked && <Pill tone="down">LEAK</Pill>}
+                <Pill>{g.geopoliticalWeight}% G-Weight</Pill>
+              </div>
+            </div>
+          )) : <p className="muted">Analyse des canaux gouvernementaux en cours...</p>}
+        </div>
+      </PageCard>
+    </div>
+
+    <div className="pageGrid">
       <PageCard title="Corrélations Détectées" subtitle="Analyse des inter-dépendances entre les signaux actifs.">
         <DataTable headers={["Paires", "Corrélation", "Analyse"]} rows={correlations.map(c => [
           `${c.symbolA} / ${c.symbolB}`,
@@ -400,14 +429,15 @@ function IntelligenceHub() {
           c.description
         ])}/>
       </PageCard>
+
+      <PageCard title="Trajectoire Prédictive Finale" subtitle="Modélisation Advanced Intelligence Final (Prototype).">
+        <p className="muted">Le moteur TER v3.6 intègre désormais la dimension temporelle basée sur l'incertitude. Les stances à faible incertitude ({"<"} 30%) sont considérées comme des signaux de conviction 'High Horizon'.</p>
+        <div className="scenarioGrid">
+          <div className="scenarioCard"><strong>Alpha Convergence</strong><span>{global?.bullishRatio > 60 ? "Signal d'achat macro détecté" : "Veille stratégique recommandée"}</span></div>
+          <div className="scenarioCard"><strong>Risk Attribution</strong><span>Facteur de risque dominant : {global?.overallSentiment === "BULLISH" ? "Euphorie technique" : "Incertitude structurelle"}</span></div>
+        </div>
+      </PageCard>
     </div>
-    <PageCard title="Trajectoire Prédictive Finale" subtitle="Modélisation Advanced Intelligence Final (Prototype).">
-      <p className="muted">Le moteur TER v3.6 intègre désormais la dimension temporelle basée sur l'incertitude. Les stances à faible incertitude ({"<"} 30%) sont considérées comme des signaux de conviction 'High Horizon'.</p>
-      <div className="scenarioGrid">
-        <div className="scenarioCard"><strong>Alpha Convergence</strong><span>{global?.bullishRatio > 60 ? "Signal d'achat macro détecté" : "Veille stratégique recommandée"}</span></div>
-        <div className="scenarioCard"><strong>Risk Attribution</strong><span>Facteur de risque dominant : {global?.overallSentiment === "BULLISH" ? "Euphorie technique" : "Incertitude structurelle"}</span></div>
-      </div>
-    </PageCard>
   </>;
 }
 

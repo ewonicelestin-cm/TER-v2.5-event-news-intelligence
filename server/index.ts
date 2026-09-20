@@ -34,6 +34,7 @@ import { addAutomationRule, deleteAutomationRule, evaluateAutomationRules, getAu
 import { addWorkflow, deleteWorkflow, getWorkflowRuns, getWorkflows, runWorkflow, updateWorkflow, workflowStats } from "../src/services/workflowEngine.js";
 import { ObservabilityEngine } from "../src/services/observabilityEngine.js";
 import { buildGlobalIntelligence, analyzeCorrelations } from "../src/services/advancedIntelligence.js";
+import { scanPowerArcana, getArcaneGems } from "../src/services/arcaneIntelligenceEngine.js";
 
 dotenv.config();
 const app = express();
@@ -114,6 +115,10 @@ app.get("/api/intelligence/correlations", async (_req, res) => {
   const history = await historyBySymbol(assets);
   const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
   res.json(analyzeCorrelations(baseSignals));
+});
+
+app.get("/api/intelligence/arcane-gems", (_req, res) => {
+  res.json(getArcaneGems());
 });
 
 app.get("/api/institutional/overview", async (_req, res) => {
@@ -614,6 +619,12 @@ const engineTimer = setInterval(() => {
   marketEngine.refresh().catch(err => console.error("[engine] scheduled refresh failed", err));
 }, 60_000);
 engineTimer.unref?.();
+
+// v3.6 Arcane Intelligence Loop
+const arcaneTimer = setInterval(() => {
+  scanPowerArcana();
+}, 30_000);
+arcaneTimer.unref?.();
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`TER API listening on http://0.0.0.0:${PORT}`);
