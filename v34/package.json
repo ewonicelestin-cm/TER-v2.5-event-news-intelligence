@@ -1,0 +1,38 @@
+{
+  "name": "ter-market-intelligence",
+  "private": true,
+  "version": "3.6.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "api": "tsx server/index.ts",
+    "dev:full": "concurrently \"npm run dev\" \"npm run api\"",
+    "build:server": "tsc -p tsconfig.server.json",
+    "test": "node --test tests/smoke.test.mjs",
+    "test:smoke": "node --test tests/smoke.test.mjs",
+    "check:files": "node --test tests/smoke.test.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/pg": "^8.11.10",
+    "@types/node": "^22.10.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "tsx": "^4.19.2",
+    "concurrently": "^9.1.2"
+  }
+}

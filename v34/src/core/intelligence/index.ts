@@ -1,0 +1,19 @@
+import type { MarketAsset, Signal } from "../../types";
+import { computeConfidence } from "../confidence";
+import { detectContradictions } from "../contradiction";
+import { buildDecisionFrame } from "../decision";
+import { provenance, type Evidence } from "../provenance";
+import { buildScenarios } from "../scenario";
+import { buildEvidenceGraph, type EvidenceGraph } from "../graph";
+export interface IntelligenceOverview { generatedAt:string; engineVersion:string; coverage:number; globalConfidence:number; signalCount:number; contradictions:number; regime:string; provenance:Evidence<string>[]; decision:ReturnType<typeof buildDecisionFrame>; scenarios:ReturnType<typeof buildScenarios>; graph:EvidenceGraph; pipeline:{stage:string;status:"READY"|"RUNNING"|"DEGRADED"|"FAILED";latencyMs:number;dependencies:number}[]; controls:{dataQuality:number;modelAgreement:number;freshness:number;uncertainty:number}; warnings:string[]; }
+export function buildIntelligenceOverview(args:{assets:MarketAsset[];signals:Signal[];regime?:string;macroScore?:number;fundamentalScore?:number;newsScore?:number;riskScore?:number}):IntelligenceOverview {
+  const assets=args.assets; const signals=args.signals; const best=signals[0]; const quality=assets.length?assets.reduce((s,a)=>s+(a.dataQualityScore??50),0)/assets.length:0; const freshness=assets.length?assets.reduce((s,a)=>s+(a.dataQuality==="FRESH"?100:a.dataQuality==="STALE"?55:35),0)/assets.length:0; const agreement=best?.aiDecision ? Math.max(0,Math.min(100,100-(best.aiDecision.uncertainty??35))) : 50;
+  const technical=best? (best.direction==="LONG"?1:best.direction==="SHORT"?-1:0) * (best.score/100) : 0; const macro=args.macroScore??0; const fundamental=(args.fundamentalScore??50)/50-1; const news=args.newsScore??0; const risk=args.riskScore??0;
+  const contradictions=detectContradictions({technical,macro,fundamental,news,risk}); const confidence=computeConfidence({dataQuality:quality,modelConfidence:best?.confidence,agreement,freshness,contradictions:contradictions.length*10}); const score=.45*technical+.2*macro+.15*fundamental+.15*news-.05*risk; const decision=buildDecisionFrame(score,confidence,contradictions);
+  const prov:Evidence<string>[]=[{value:`${assets.length} actifs`,provenance:provenance("MarketDataEngine",assets.some(a=>a.dataSource==="live")?"LIVE":"SYNTHETIC",quality,"Agrégation des flux marché disponibles",assets.map(a=>a.symbol))},{value:`${signals.length} signaux`,provenance:provenance("SignalEngine + AI Ensemble","DERIVED",Math.round((best?.confidence??50)),"Confluence multi-facteurs et ensemble probabiliste",signals.slice(0,5).map(s=>s.symbol))}];
+  const scenarios=buildScenarios(args.regime??"MIXED",confidence.overall);
+  const graph=buildEvidenceGraph({assets,signals,regime:args.regime??"MIXED",macroScore:macro,fundamentalScore:args.fundamentalScore??50,newsScore:news,riskScore:risk});
+  const pipeline=["INGEST","NORMALIZE","FEATURES","SIGNALS","ENSEMBLE","CALIBRATION","RISK","SCENARIO","DECISION","AUDIT"].map((stage,i)=>({stage,status:(i===9?"READY":i>=7?"DEGRADED":"READY") as "READY"|"DEGRADED",latencyMs:Math.max(1,Math.round(4+i*3+(100-quality)/20)),dependencies:i+1}));
+  const warnings:string[]=[...confidence.penalties]; if(!assets.some(a=>a.dataSource==="live")) warnings.push("Aucun flux live détecté : l'analyse reste démonstrative."); if(contradictions.length) warnings.push(`${contradictions.length} contradiction(s) inter-domaines réduisent la confiance.`);
+  return {generatedAt:new Date().toISOString(),engineVersion:"3.6",coverage:assets.length?Math.round(100*signals.length/Math.max(assets.length,1)):0,globalConfidence:confidence.overall,signalCount:signals.length,contradictions:contradictions.length,regime:args.regime??"MIXED",provenance:prov,decision,scenarios,graph,pipeline,controls:{dataQuality:Math.round(quality),modelAgreement:Math.round(agreement),freshness:Math.round(freshness),uncertainty:100-confidence.overall},warnings};
+}

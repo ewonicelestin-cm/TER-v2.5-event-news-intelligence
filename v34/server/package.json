@@ -1,0 +1,22 @@
+{
+  "name": "ter-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@types/pg": "^8.11.10",
+    "@types/node": "^22.10.2"
+  },
+  "version": "3.6.0"
+}
