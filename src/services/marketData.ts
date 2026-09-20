@@ -9,8 +9,18 @@ export const demoAssets: MarketAsset[] = [
   { symbol: "BTCUSD", name: "Bitcoin", market: "24/7", assetClass: "Crypto", price: 118420, change24h: 1.12, volume: 34600000000 },
   { symbol: "ETHUSD", name: "Ethereum", market: "24/7", assetClass: "Crypto", price: 4240.7, change24h: 0.74, volume: 18300000000 },
   { symbol: "XAUUSD", name: "Gold", market: "COMEX/OTC", assetClass: "Commodities", price: 3387.4, change24h: -0.35, volume: 0 },
+  { symbol: "XAGUSD", name: "Silver", market: "COMEX/OTC", assetClass: "Commodities", price: 34.12, change24h: 1.15, volume: 0 },
+  { symbol: "XPTUSD", name: "Platinum", market: "NYMEX/OTC", assetClass: "Commodities", price: 1045.30, change24h: -0.42, volume: 0 },
+  { symbol: "HG1", name: "Copper", market: "COMEX", assetClass: "Commodities", price: 4.85, change24h: 0.82, volume: 0 },
+  { symbol: "CL1", name: "Crude Oil WTI", market: "NYMEX", assetClass: "Commodities", price: 78.45, change24h: -1.24, volume: 0 },
   { symbol: "SPX", name: "S&P 500", market: "CME", assetClass: "Indices", price: 6421.18, change24h: 0.62, volume: 0 },
-  { symbol: "NDX", name: "Nasdaq 100", market: "NASDAQ/CME", assetClass: "Indices", price: 23642.2, change24h: 0.88, volume: 0 }
+  { symbol: "NDX", name: "Nasdaq 100", market: "NASDAQ/CME", assetClass: "Indices", price: 23642.2, change24h: 0.88, volume: 0 },
+  { symbol: "DAX", name: "DAX 40", market: "XETRA", assetClass: "Indices", price: 19234.5, change24h: 0.45, volume: 0 },
+  { symbol: "NI225", name: "Nikkei 225", market: "TSE", assetClass: "Indices", price: 38560.1, change24h: -1.12, volume: 0 },
+  { symbol: "HSI", name: "Hang Seng", market: "HKEX", assetClass: "Indices", price: 17842.3, change24h: 0.25, volume: 0 },
+  { symbol: "J200", name: "JSE Top 40", market: "JSE", assetClass: "Indices", price: 74210.5, change24h: -0.15, volume: 0 },
+  { symbol: "TSM", name: "TSMC", market: "NYSE/TWSE", assetClass: "Equities", price: 174.20, change24h: 2.15, volume: 12500000 },
+  { symbol: "MC.PA", name: "LVMH", market: "EURONEXT", assetClass: "Equities", price: 742.30, change24h: -0.85, volume: 450000 }
 ];
 
 export const demoNews: NewsItem[] = [

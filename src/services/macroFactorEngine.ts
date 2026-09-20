@@ -32,12 +32,12 @@ export function buildMacroRegime(assets: MarketAsset[], histories: Record<string
   let regime:MacroRegime="MIXED"; let score=riskOn;
   if(riskOn>0.22) regime="RISK_ON"; else if(riskOn<-0.22) regime="RISK_OFF"; else if(inflation>0.28) { regime="INFLATION_PRESSURE"; score=inflation; } else if(deflation>0.28) { regime="DEFLATION_PRESSURE"; score=deflation; }
   const factors:MacroFactor[]=[
-    {name:"EQUITY_MOMENTUM",value:equity,contribution:equity*.35,confidence:.75,interpretation:equity>0.15?"Momentum actions favorable":"Momentum actions faible ou négatif"},
-    {name:"CRYPTO_MOMENTUM",value:crypto,contribution:crypto*.2,confidence:.65,interpretation:crypto>0.15?"Appétit pour le risque élevé":"Crypto sous pression"},
-    {name:"USD_STRENGTH",value:usd,contribution:-usd*.15,confidence:.7,interpretation:usd>0.15?"Dollar relativement ferme":"Dollar relativement faible"},
-    {name:"COMMODITY_PRESSURE",value:commodities,contribution:commodities*.45,confidence:.6,interpretation:commodities>0.15?"Pression haussière des matières premières":"Matières premières sous pression"},
-    {name:"RATE_PRESSURE",value:rates,contribution:rates*.25,confidence:.55,interpretation:rates>0.15?"Pression sur les taux":"Momentum taux faible"},
-    {name:"VOLATILITY",value:vol,contribution:-vol*.2,confidence:.65,interpretation:vol>.55?"Volatilité agrégée élevée":"Volatilité agrégée contenue"}
+    {name:"EQUITY_MOMENTUM",value:equity,contribution:equity*.35,confidence:.75,interpretation:equity>0.15?"Appétit global pour les actions (Sources: NYSE, NASDAQ, Euronext, TSE)":"Momentum actions faible ou négatif"},
+    {name:"CRYPTO_MOMENTUM",value:crypto,contribution:crypto*.2,confidence:.65,interpretation:crypto>0.15?"Sentiment risque digital (Sources: Binance, CoinGecko)":"Crypto sous pression"},
+    {name:"USD_STRENGTH",value:usd,contribution:-usd*.15,confidence:.7,interpretation:usd>0.15?"Force du Dollar vs Major FX (Sources: BCE, Frankfurter)":"Dollar relativement faible"},
+    {name:"COMMODITY_PRESSURE",value:commodities,contribution:commodities*.45,confidence:.6,interpretation:commodities>0.15?"Pression inflationniste matières premières (Sources: LME, COMEX, OPEC)":"Matières premières sous pression"},
+    {name:"RATE_PRESSURE",value:rates,contribution:rates*.25,confidence:.55,interpretation:rates>0.15?"Pressions sur les taux obligataires (Sources: Fed, BCE)":"Momentum taux faible"},
+    {name:"VOLATILITY",value:vol,contribution:-vol*.2,confidence:.65,interpretation:vol>.55?"Incertitude marché élevée (Sources: CBOE VIX, JPX)":"Volatilité agrégée contenue"}
   ];
   const heat=(cls:AssetClass, value:number) => ({assetClass:cls,score:Math.max(-1,Math.min(1,value)),label:(value>.12?"POSITIVE":value<-.12?"NEGATIVE":"NEUTRAL") as "POSITIVE"|"NEUTRAL"|"NEGATIVE"});
   const assetClassHeatmap=[heat("Equities",equity),heat("Indices",indices),heat("Crypto",crypto),heat("Forex",-usd),heat("Commodities",commodities),heat("Rates",-rates)];

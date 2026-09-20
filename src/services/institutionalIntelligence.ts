@@ -28,13 +28,16 @@ export function buildFactorExposure(assets: MarketAsset[]): FactorExposure[] {
   const groups = new Map<AssetClass, MarketAsset[]>();
   for (const a of assets) { const list = groups.get(a.assetClass) ?? []; list.push(a); groups.set(a.assetClass, list); }
   const avg = (xs: MarketAsset[]) => xs.length ? xs.reduce((s, a) => s + a.change24h, 0) / xs.length : 0;
-  const equities = avg(groups.get("Equities") ?? []), crypto = avg(groups.get("Crypto") ?? []), forex = avg(groups.get("Forex") ?? []), commodities = avg(groups.get("Commodities") ?? []), rates = avg(groups.get("Rates") ?? []);
+  const equities = avg(groups.get("Equities") ?? []), crypto = avg(groups.get("Crypto") ?? []), forex = avg(groups.get("Forex") ?? []), indices = avg(groups.get("Indices") ?? []), commodities = avg(groups.get("Commodities") ?? []), rates = avg(groups.get("Rates") ?? []);
+  const preciousAvg = avg((groups.get("Commodities") ?? []).filter(c => ["XAUUSD", "XAGUSD", "XPTUSD"].includes(c.symbol)));
+  const energyAvg = avg((groups.get("Commodities") ?? []).filter(c => ["CL1"].includes(c.symbol)));
+
   return [
-    { factor: "Risk appetite", assetClass: "Cross-Asset", exposure: Number(((equities + crypto) / 2).toFixed(2)), interpretation: "Moyenne des variations actions et crypto." },
-    { factor: "Dollar / FX", assetClass: "Forex", exposure: Number((-forex).toFixed(2)), interpretation: "Proxy inversé du mouvement moyen FX suivi." },
-    { factor: "Commodities", assetClass: "Commodities", exposure: Number(commodities.toFixed(2)), interpretation: "Sensibilité agrégée des matières premières suivies." },
-    { factor: "Rates pressure", assetClass: "Rates", exposure: Number(rates.toFixed(2)), interpretation: "Variation moyenne des instruments de taux disponibles." },
-    { factor: "Crypto beta", assetClass: "Crypto", exposure: Number(crypto.toFixed(2)), interpretation: "Momentum crypto agrégé." }
+    { factor: "Risk appetite", assetClass: "Cross-Asset", exposure: Number(((equities + crypto) / 2).toFixed(2)), interpretation: "Appétit global (Actions/Crypto). Sources: NYSE, NASDAQ, TSE, Binance." },
+    { factor: "Regional Dynamics", assetClass: "Cross-Asset", exposure: Number(((forex + indices) / 2).toFixed(2)), interpretation: "Flux Asie/Europe vs USA. Sources: Euronext, HKEX, JPX, JSE." },
+    { factor: "Precious Metals", assetClass: "Commodities", exposure: Number(preciousAvg.toFixed(2)), interpretation: "Refuge (Or/Argent). Sources: LBMA, World Gold Council." },
+    { factor: "Energy & Industry", assetClass: "Commodities", exposure: Number(energyAvg.toFixed(2)), interpretation: "Pression coûts réels (Pétrole/Cuivre). Sources: IEA, LME, ICSG." },
+    { factor: "Global FX Matrix", assetClass: "Forex", exposure: Number((-forex).toFixed(2)), interpretation: "Relative USD strength vs EUR/GBP. Sources: BCE, Frankfurter." }
   ];
 }
 
