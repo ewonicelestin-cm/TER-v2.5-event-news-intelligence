@@ -33,6 +33,7 @@ import { evaluateMonitoring, getNotifications, markNotificationRead, markAllNoti
 import { addAutomationRule, deleteAutomationRule, evaluateAutomationRules, getAutomationRules, updateAutomationRule } from "../src/services/automationEngine.js";
 import { addWorkflow, deleteWorkflow, getWorkflowRuns, getWorkflows, runWorkflow, updateWorkflow, workflowStats } from "../src/services/workflowEngine.js";
 import { ObservabilityEngine } from "../src/services/observabilityEngine.js";
+import { buildGlobalIntelligence, analyzeCorrelations } from "../src/services/advancedIntelligence.js";
 
 dotenv.config();
 const app = express();
@@ -89,6 +90,30 @@ app.get("/api/reliability/status", (_req, res) => {
     health: marketEngine.getStatus(),
     telemetry: ObservabilityEngine.getSummary()
   });
+});
+
+app.get("/api/intelligence/global", async (_req, res) => {
+  const assets = await marketEngine.getMarkets();
+  const history = await historyBySymbol(assets);
+  const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
+
+  const decisions = await Promise.all(baseSignals.map(async signal => {
+    const asset = assets.find(a => a.symbol === signal.symbol);
+    if (!asset) return null;
+    const histories = await intelligenceHistories(asset);
+    const enriched = buildSignalIntelligence(asset, signal, histories);
+    return buildAIDecision(asset, enriched);
+  }));
+
+  const validDecisions = decisions.filter((d): d is any => d !== null);
+  res.json(buildGlobalIntelligence(assets, validDecisions));
+});
+
+app.get("/api/intelligence/correlations", async (_req, res) => {
+  const assets = await marketEngine.getMarkets();
+  const history = await historyBySymbol(assets);
+  const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
+  res.json(analyzeCorrelations(baseSignals));
 });
 
 app.get("/api/institutional/overview", async (_req, res) => {

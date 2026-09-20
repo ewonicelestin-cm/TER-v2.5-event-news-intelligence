@@ -306,3 +306,9 @@ La plateforme dispose désormais d'une fiche d'intelligence transversale par act
 - Circuit Breakers & Retry intelligents.
 - Télémétrie système et tracing d'exécution.
 - Monitoring historique des fournisseurs.
+
+## v3.6 — Advanced Intelligence Final
+- **Intelligence Hub** : Dashboard de sentiment global agrégé par IA.
+- **Cross-Asset Correlation** : Détection des corrélations et divergences inter-marchés.
+- **Predictive Horizon** : Estimation de la durée de validité des signaux.
+- **AI Stance Reasoning** : Justification avancée des décisions par experts.

@@ -14,7 +14,7 @@ export interface AIExpertOpinion {
 }
 
 export interface AIDecision {
-  engine: "TER Ensemble v2.0";
+  engine: "TER Advanced Ensemble v3.6";
   generatedAt: string;
   stance: AIStance;
   probability: { bullish: number; neutral: number; bearish: number };
@@ -25,6 +25,7 @@ export interface AIDecision {
     primary: string;
     invalidation: string;
     alternative: string;
+    horizon: string;
   };
   dataQuality: { status: string; score: number; provider: string };
   disclaimer: string;
@@ -52,44 +53,44 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
 
   const experts: AIExpertOpinion[] = [
     {
-      name: "Technical Analyst",
-      role: "Indicateurs et momentum",
+      name: "Technical Expert v3.6",
+      role: "Indicateurs et momentum avancé",
       stance: stanceFromScore(technicalScore),
       score: Math.round(clamp(technicalScore)),
       confidence: Math.round(clamp(55 + Math.abs(technicalScore - 50))),
       reasons: intel?.evidence.flatMap(e => e.reasons).slice(0, 3) ?? signal.reasons.slice(0, 3)
     },
     {
-      name: "Regime Analyst",
-      role: "Régime multi-timeframe",
+      name: "Regime Strategist",
+      role: "Régime multi-timeframe & Macro",
       stance: stanceFromScore(clamp(50 + regimeBias)),
       score: Math.round(clamp(50 + regimeBias)),
       confidence: Math.round(clamp(50 + Math.abs(regimeBias) * 1.5)),
       reasons: evidence.map(e => `${e.timeframe}: ${e.regime}`).slice(0, 3)
     },
     {
-      name: "Structure Analyst",
-      role: "Support, résistance, cassure",
+      name: "Structural Analyst",
+      role: "Supports, résistances & cassures",
       stance: stanceFromScore(50 + structureBias),
       score: Math.round(clamp(50 + structureBias)),
       confidence: structureBias === 0 ? 50 : 72,
-      reasons: [intel?.structure.breakout !== "NONE" ? `Cassure ${intel?.structure.breakout}` : "Pas de cassure confirmée"]
+      reasons: [intel?.structure.breakout !== "NONE" ? `Cassure ${intel?.structure.breakout} identifiée` : "Phase de consolidation structurelle"]
     },
     {
-      name: "Divergence Analyst",
-      role: "RSI et retournements potentiels",
+      name: "Predictive Analyst",
+      role: "Divergences & probabilités",
       stance: stanceFromScore(50 + divergenceBias),
       score: Math.round(clamp(50 + divergenceBias)),
       confidence: intel?.divergences.length ? 65 : 50,
-      reasons: intel?.divergences.length ? intel.divergences.map(d => d.description) : ["Aucune divergence RSI détectée"]
+      reasons: intel?.divergences.length ? intel.divergences.map(d => d.description) : ["Équilibre prédictif : pas de divergence majeure"]
     },
     {
-      name: "Data Quality Analyst",
-      role: "Fiabilité et fraîcheur des données",
+      name: "Reliability Auditor",
+      role: "Intégrité des données v3.5+",
       stance: "NEUTRAL",
       score: Math.round(clamp(quality)),
       confidence: Math.round(clamp(quality)),
-      reasons: [`Source ${asset.provider ?? "inconnue"}`, `Qualité ${asset.dataQuality ?? "UNKNOWN"} · ${quality}/100`]
+      reasons: [`Flux ${asset.provider ?? "synthetic"}`, `Fiabilité ${asset.dataQuality ?? "UNKNOWN"} (${quality}/100)`]
     }
   ];
 
@@ -118,28 +119,33 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
   probability.bearish = Math.max(0, 100 - probability.bullish - probability.neutral);
 
   const agreementLevel: AIAgreement = agreement >= 0.8 ? "HIGH" : agreement >= 0.6 ? "MEDIUM" : "LOW";
+
   const primary = direction === "BULLISH"
-    ? "Scénario haussier conditionnel : la confluence actuelle favorise une poursuite si les confirmations restent valides."
+    ? `L'analyse v3.6 favorise une dynamique haussière avec un score de ${probability.bullish}%. La confluence technique et structurelle suggère une poursuite vers les objectifs.`
     : direction === "BEARISH"
-      ? "Scénario baissier conditionnel : la confluence actuelle favorise une poursuite si les confirmations restent valides."
-      : "Scénario neutre : les éléments sont insuffisamment alignés pour privilégier une direction.";
+      ? `L'analyse v3.6 identifie une pression baissière dominante (${probability.bearish}%). Les indicateurs de momentum et la structure de marché s'alignent vers le bas.`
+      : "Stagnation détectée : les forces haussières et baissières s'équilibrent. Le modèle Advanced Intelligence reste neutre en l'absence de cassure confirmée.";
+
   const invalidation = intel && intel.structure.breakout !== "NONE"
-    ? `Surveiller l'invalidation de la structure après la cassure ${intel.structure.breakout}.`
-    : "Une rupture de la structure récente ou une dégradation de la qualité des données invalide le scénario.";
+    ? `Le scénario est invalidé par un retour sous la structure de cassure ${intel.structure.breakout} ou une baisse de confiance < 50%.`
+    : "Une divergence inverse forte ou une rupture des supports/résistances majeurs invalide la thèse actuelle.";
+
   const alternative = direction === "NEUTRAL"
-    ? "Une confirmation multi-timeframe supplémentaire pourrait faire évoluer le scénario."
-    : "Le scénario alternatif reste une phase de range ou un retour vers la structure récente.";
+    ? "Une accélération du volume sur les résistances pourrait forcer un scénario haussier agressif."
+    : "Une phase de distribution latérale est probable si le momentum actuel s'essouffle prématurément.";
+
+  const horizon = uncertainty < 30 ? "Court terme (6-24h)" : uncertainty < 60 ? "Moyen terme (1-3 jours)" : "Indéterminé (Haute incertitude)";
 
   return {
-    engine: "TER Ensemble v2.0",
+    engine: "TER Advanced Ensemble v3.6",
     generatedAt: new Date().toISOString(),
     stance: direction,
     probability,
     uncertainty,
     agreement: agreementLevel,
     experts,
-    scenario: { primary, invalidation, alternative },
+    scenario: { primary, invalidation, alternative, horizon },
     dataQuality: { status: asset.dataQuality ?? "UNKNOWN", score: quality, provider: asset.provider ?? "unknown" },
-    disclaimer: "Sortie analytique probabiliste destinée à l'étude et au paper trading. Elle ne constitue pas une garantie ni un conseil financier personnalisé."
+    disclaimer: "Release Final v3.6 - Prototype de recherche IA. Sortie analytique probabiliste destinée au paper trading."
   };
 }

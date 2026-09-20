@@ -31,7 +31,7 @@ function demoTrades(bars: OHLCVBar[], holdBars = 5): BacktestTrade[] {
 }
 
 
-type RouteKey = "dashboard" | "notifications" | "institutional" | "watchlist" | "alerts" | "research" | "asset" | "markets" | "signals" | "analysis" | "portfolio" | "risk" | "optimizer" | "stress" | "macro" | "events" | "news" | "fundamentals" | "journal" | "ai" | "backtest" | "social" | "data" | "settings" | "workflow" | "observability";
+type RouteKey = "dashboard" | "notifications" | "institutional" | "watchlist" | "alerts" | "research" | "asset" | "markets" | "signals" | "analysis" | "portfolio" | "risk" | "optimizer" | "stress" | "macro" | "events" | "news" | "fundamentals" | "journal" | "ai" | "backtest" | "social" | "data" | "settings" | "workflow" | "observability" | "intelligence";
 
 const NAV_GROUPS: Array<{ title: string; items: Array<{ key: RouteKey; label: string; icon: ReactNode; badge?: string }> }> = [
   { title: "TERMINAL", items: [
@@ -52,6 +52,7 @@ const NAV_GROUPS: Array<{ title: string; items: Array<{ key: RouteKey; label: st
     { key: "stress", label: "Stress Tests", icon: <TriangleAlert size={17}/> },
   ]},
   { title: "INTELLIGENCE", items: [
+    { key: "intelligence", label: "Intelligence Hub", icon: <BrainCircuit size={17}/>, badge: "v3.6" },
     { key: "macro", label: "Régimes & Macro", icon: <Landmark size={17}/> },
     { key: "fundamentals", label: "Fondamentaux", icon: <CircleDollarSign size={17}/>, badge: "v2.7" },
     { key: "events", label: "Événements", icon: <CalendarDays size={17}/>, badge: "v2.6" },
@@ -305,9 +306,21 @@ function SocialPage() { return <><PageHeader icon={<Users/>} title="Social Intel
 function DataPage({ assets, engineStatus }: { assets: MarketAsset[]; engineStatus: any }) { return <><PageHeader icon={<Database/>} title="Données & Qualité" subtitle="Provenance, fraîcheur, latence, cache et santé du moteur temps réel."/><div className="metricTiles"><Stat label="Actifs" value={String(assets.length)}/><Stat label="Fresh" value={String(assets.filter(a=>a.dataQuality === "FRESH").length)}/><Stat label="Synthétiques" value={String(assets.filter(a=>a.dataQuality === "SYNTHETIC" || a.dataSource === "synthetic").length)}/><Stat label="Échecs fournisseurs" value={String(engineStatus?.failureCount ?? 0)}/></div><PageCard title="Santé des flux"><DataTable headers={["Actif","Provider","Source","Qualité","Score","Réception","Latence"]} rows={assets.map(a=>[a.symbol,a.provider??"—",a.dataSource??"—",a.dataQuality??"—",a.dataQualityScore??"—",a.receivedAt ? new Date(a.receivedAt).toLocaleTimeString() : "—",a.latencyMs != null ? `${a.latencyMs} ms` : "—"])}/></PageCard></> }
 
 function WorkflowPage() {
-  const [rows,setRows]=useState<any[]>([]); const [stats,setStats]=useState<any>({}); const [runs,setRuns]=useState<any[]>([]);
-  const load=()=>Promise.all([fetch("/api/workflows").then(r=>r.json()),fetch("/api/workflows/stats").then(r=>r.json()),fetch("/api/workflows/runs").then(r=>r.json())]).then(([w,s,r])=>{setRows(w);setStats(s);setRuns(r)}).catch(()=>{});
-  useEffect(()=>{load();},[]);
+  const [rows, setRows] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({});
+  const [runs, setRuns] = useState<any[]>([]);
+  const load = () => {
+    Promise.all([
+      fetch("/api/workflows").then(r => r.json()),
+      fetch("/api/workflows/stats").then(r => r.json()),
+      fetch("/api/workflows/runs").then(r => r.json())
+    ]).then(([w, s, r]) => {
+      setRows(w);
+      setStats(s);
+      setRuns(r);
+    }).catch(() => { });
+  };
+  useEffect(() => { load(); }, []);
   const add=async()=>{await fetch("/api/workflows",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:"Nouveau workflow",description:"Workflow configurable TER",status:"DRAFT",nodes:[{id:"trigger",type:"TRIGGER",label:"Déclencheur",config:{event:"SIGNAL_CREATED"}},{id:"condition",type:"CONDITION",label:"Condition",config:{metric:"SIGNAL_SCORE",operator:">=",value:70}},{id:"notification",type:"NOTIFICATION",label:"Notification",config:{severity:"MEDIUM"}}],edges:[{from:"trigger",to:"condition"},{from:"condition",to:"notification",when:"TRUE"}]})});load();};
   const run=async(id:string)=>{const r=await fetch(`/api/workflows/${id}/run`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dryRun:true})}); if(r.ok){const item=await r.json(); setRuns(x=>[item,...x]);} load();};
   return <><PageHeader icon={<Workflow/>} title="Workflow Builder" subtitle="Orchestration visuelle des conditions, validations, scénarios et notifications." action={<button className="primaryBtn" onClick={add}>+ Nouveau workflow</button>}/><div className="metricTiles"><Stat label="Workflows" value={String(stats.workflows??0)}/><Stat label="Actifs" value={String(stats.active??0)}/><Stat label="Brouillons" value={String(stats.drafts??0)}/><Stat label="Exécutions" value={String(stats.runs??0)}/></div><PageCard title="Workflows configurés"><DataTable headers={["Nom","Statut","Nœuds","Transitions","Exécutions","Action"]} rows={rows.map(w=>[w.name,<Pill tone={w.status==="ACTIVE"?"up":"neutral"}>{w.status}</Pill>,w.nodes.length,w.edges.length,w.runCount,<><button className="linkBtn" onClick={()=>run(w.id)}>Tester en simulation</button> <button className="linkBtn" onClick={()=>fetch(`/api/workflows/${w.id}`,{method:"DELETE"}).then(load)}>Supprimer</button></>])}/></PageCard>
@@ -316,21 +329,81 @@ function WorkflowPage() {
 }
 
 function ObservabilityPage() {
-  const [metrics,setMetrics]=useState<any>({summary:{},metrics:[]});
-  const [providers,setProviders]=useState<any>({});
-  const load=()=>Promise.all([fetch("/api/observability/metrics").then(r=>r.json()),fetch("/api/observability/providers").then(r=>r.json())]).then(([m,p])=>{setMetrics(m);setProviders(p)}).catch(()=>{});
-  useEffect(()=>{load(); const t=setInterval(load,5000); return ()=>clearInterval(t);},[]);
+  const [metrics, setMetrics] = useState<any>({ summary: {}, metrics: [] });
+  const [providers, setProviders] = useState<any>({});
+  const load = () => {
+    Promise.all([
+      fetch("/api/observability/metrics").then(r => r.json()),
+      fetch("/api/observability/providers").then(r => r.json())
+    ]).then(([m, p]) => {
+      setMetrics(m);
+      setProviders(p);
+    }).catch(() => { });
+  };
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 5000);
+    return () => clearInterval(t);
+  }, []);
   return <><PageHeader icon={<HeartPulse/>} title="Observabilité & Santé" subtitle="Télémétrie système, santé des fournisseurs, circuit breakers et monitoring v3.5."/><div className="metricTiles"><Stat label="Métrique totales" value={String(metrics.summary?.totalMetrics??0)}/><Stat label="Latence moy." value={`${Math.round(metrics.summary?.avgLatency??0)}ms`}/><Stat label="Erreurs (1h)" value={String(metrics.summary?.errorsLastHour??0)}/><Stat label="Fournisseurs actifs" value={String(metrics.summary?.activeProviders??0)}/></div>
     <div className="pageGrid"><PageCard title="Santé des Fournisseurs v3.5"><DataTable headers={["Fournisseur","Statut","Circuit Breaker","Latence","Dernier check"]} rows={Object.entries(providers).map(([name,p]:[string,any])=>[name,<Pill tone={p.status==="available"?"up":p.status==="degraded"?"warn":"down"}>{p.status.toUpperCase()}</Pill>,<Pill tone={p.circuitBreakerOpen?"down":"up"}>{p.circuitBreakerOpen?"OUVERT":"FERMÉ"}</Pill>,`${p.latencyMs}ms`,new Date(p.lastCheckAt).toLocaleTimeString()])}/></PageCard>
     <PageCard title="Télémétrie en temps réel (Derniers 15)"><DataTable headers={["Métrique","Valeur","Unité","Source","Heure"]} rows={metrics.metrics.slice(-15).reverse().map((m:any)=>[m.name,m.value,m.unit,m.tags?.provider??"SYSTEM",new Date(m.timestamp).toLocaleTimeString()])}/></PageCard></div>
     <PageCard title="Fiabilité & Résilience"><div className="scenarioGrid"><div className="scenarioCard"><strong>Circuit Breaker</strong><span>Protection contre les timeouts provider. Seuil : 5 erreurs.</span></div><div className="scenarioCard"><strong>Retry Strategy</strong><span>Exponential backoff (1s, 2s, 4s).</span></div><div className="scenarioCard"><strong>Persistence</strong><span>Audit complet et persistance DB activée.</span></div><div className="scenarioCard"><strong>Fallback</strong><span>Repli automatique sur données synthétiques déterministes.</span></div></div></PageCard></>
 }
 
+function IntelligenceHub() {
+  const [global, setGlobal] = useState<any>(null);
+  const [correlations, setCorrelations] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/intelligence/global").then(r => r.json()).then(setGlobal);
+    fetch("/api/intelligence/correlations").then(r => r.json()).then(setCorrelations);
+  }, []);
+
+  return <>
+    <PageHeader icon={<BrainCircuit/>} title="Intelligence Hub v3.6" subtitle="Sentiment global, corrélations avancées et trajectoires prédictives."/>
+    {global && <div className="metricTiles">
+      <Stat label="Sentiment" value={global.overallSentiment}/>
+      <Stat label="Bullish" value={`${global.bullishRatio}%`}/>
+      <Stat label="Bearish" value={`${global.bearishRatio}%`}/>
+      <Stat label="Alignement" value={global.marketAlignment}/>
+    </div>}
+    <div className="pageGrid">
+      <PageCard title="Sentiment Global IA" subtitle="Agrégation en temps réel des stances de l'Ensemble v3.6.">
+        <div className="scenarioGrid">
+          <div className="scenarioCard">
+            <strong>Dominante</strong>
+            <span className="up">{global?.bullishRatio > 50 ? "BULLISH" : "Ajustement…"}</span>
+          </div>
+          <div className="scenarioCard">
+            <strong>Cohérence</strong>
+            <span>{global?.marketAlignment === "HIGH" ? "Forte convergence des signaux" : "Signaux mixtes (Hésitation)"}</span>
+          </div>
+        </div>
+      </PageCard>
+      <PageCard title="Corrélations Détectées" subtitle="Analyse des inter-dépendances entre les signaux actifs.">
+        <DataTable headers={["Paires", "Corrélation", "Analyse"]} rows={correlations.map(c => [
+          `${c.symbolA} / ${c.symbolB}`,
+          <Pill tone={c.impact === "POSITIVE" ? "up" : "down"}>{(c.correlation * 100).toFixed(0)}%</Pill>,
+          c.description
+        ])}/>
+      </PageCard>
+    </div>
+    <PageCard title="Trajectoire Prédictive Finale" subtitle="Modélisation Advanced Intelligence Final (Prototype).">
+      <p className="muted">Le moteur TER v3.6 intègre désormais la dimension temporelle basée sur l'incertitude. Les stances à faible incertitude ({"<"} 30%) sont considérées comme des signaux de conviction 'High Horizon'.</p>
+      <div className="scenarioGrid">
+        <div className="scenarioCard"><strong>Alpha Convergence</strong><span>{global?.bullishRatio > 60 ? "Signal d'achat macro détecté" : "Veille stratégique recommandée"}</span></div>
+        <div className="scenarioCard"><strong>Risk Attribution</strong><span>Facteur de risque dominant : {global?.overallSentiment === "BULLISH" ? "Euphorie technique" : "Incertitude structurelle"}</span></div>
+      </div>
+    </PageCard>
+  </>;
+}
+
 function SettingsPage() { return <><PageHeader icon={<Settings/>} title="Paramètres" subtitle="Configuration de l'interface et des connecteurs TER."/><div className="pageGrid"><PageCard title="Fournisseurs"><div className="settingRow"><span>Twelve Data</span><Pill>Clé serveur uniquement</Pill></div><div className="settingRow"><span>Binance</span><Pill tone="up">Public · Crypto</Pill></div><div className="settingRow"><span>Frankfurter</span><Pill tone="up">Référence FX</Pill></div></PageCard><PageCard title="Sécurité"><div className="settingRow"><span>Paper Trading</span><Pill tone="up">Activé</Pill></div><div className="settingRow"><span>Exécution réelle</span><Pill>Non activée</Pill></div><p className="muted">TER v3.0 reste un système d'analyse et de simulation. Les clés API sensibles doivent rester côté serveur.</p></PageCard></div></> }
 
 function PageCompleteness({ route }: { route: RouteKey }) {
   const map: Record<RouteKey, string[]> = {
-    dashboard: ["Vue globale", "Signaux actifs", "Performance", "Santé moteur"], notifications: ["Flux d'alertes", "États lu/non lu", "Méthode de déduplication"], institutional: ["Facteurs cross-asset", "Anomalies", "Couverture", "Watchlist"], watchlist: ["Ajout/retrait", "Prix live", "Provenance"], alerts: ["Règles classiques", "Automation v3.2", "Cooldown", "Déclenchements"], research: ["Recherche symbole", "Historique", "Facteurs", "Rapport exportable"], asset: ["Marché", "Technique", "Fondamentaux", "Macro", "News", "IA", "Risques"], markets: ["Univers", "Prix", "Variation", "Qualité", "Latence"], signals: ["Direction", "Score", "Confiance", "Confluence", "Traçabilité"], analysis: ["Scénarios", "Probabilités", "Incertitude", "Calibration"], portfolio: ["Capital", "Liquidités", "Positions", "Trades"], risk: ["Exposition", "Volatilité", "VaR", "Corrélations"], optimizer: ["Méthode", "Poids actuels", "Poids cibles", "Contraintes"], stress: ["Scénarios", "P&L", "Impact", "Vulnérabilités"], macro: ["Régime", "Facteurs", "Rotation", "Confiance"], events: ["Calendrier", "Importance", "Classes affectées", "Avertissements"], news: ["NLP", "Sentiment", "Entités", "Urgence"], fundamentals: ["Croissance", "Rentabilité", "Bilan", "Valorisation"], journal: ["Historique", "Résolution", "Outcome"], social: ["Profils", "Échantillons", "Consistance"], ai: ["Analystes", "Ensemble", "Accord", "Incertitude"], backtest: ["Trades", "Walk-forward", "Monte Carlo", "Régimes"], data: ["Provenance", "Freshness", "Latence", "Cache"], settings: ["Fournisseurs", "Sécurité", "Mode simulation"], workflow: ["Déclencheurs", "Conditions ALL/ANY", "Scénarios", "Journal", "Notifications", "Simulation"], observability: ["Provider Health", "Circuit Breakers", "Telemetry", "Workflow Tracing"]
+    dashboard: ["Vue globale", "Signaux actifs", "Performance", "Santé moteur"], notifications: ["Flux d'alertes", "États lu/non lu", "Méthode de déduplication"], institutional: ["Facteurs cross-asset", "Anomalies", "Couverture", "Watchlist"], watchlist: ["Ajout/retrait", "Prix live", "Provenance"], alerts: ["Règles classiques", "Automation v3.2", "Cooldown", "Déclenchements"], research: ["Recherche symbole", "Historique", "Facteurs", "Rapport exportable"], asset: ["Marché", "Technique", "Fondamentaux", "Macro", "News", "IA", "Risques"], markets: ["Univers", "Prix", "Variation", "Qualité", "Latence"], signals: ["Direction", "Score", "Confiance", "Confluence", "Traçabilité"], analysis: ["Scénarios", "Probabilités", "Incertitude", "Calibration"], portfolio: ["Capital", "Liquidités", "Positions", "Trades"], risk: ["Exposition", "Volatilité", "VaR", "Corrélations"], optimizer: ["Méthode", "Poids actuels", "Poids cibles", "Contraintes"], stress: ["Scénarios", "P&L", "Impact", "Vulnérabilités"], macro: ["Régime", "Facteurs", "Rotation", "Confiance"], events: ["Calendrier", "Importance", "Classes affectées", "Avertissements"], news: ["NLP", "Sentiment", "Entités", "Urgence"], fundamentals: ["Croissance", "Rentabilité", "Bilan", "Valorisation"], journal: ["Historique", "Résolution", "Outcome"], social: ["Profils", "Échantillons", "Consistance"], ai: ["Analystes", "Ensemble", "Accord", "Incertitude"], backtest: ["Trades", "Walk-forward", "Monte Carlo", "Régimes"], data: ["Provenance", "Freshness", "Latence", "Cache"], settings: ["Fournisseurs", "Sécurité", "Mode simulation"], workflow: ["Déclencheurs", "Conditions ALL/ANY", "Scénarios", "Journal", "Notifications", "Simulation"], observability: ["Provider Health", "Circuit Breakers", "Telemetry", "Workflow Tracing"], intelligence: ["Global Sentiment", "Cross-Asset Correlations", "Ensemble v3.6", "Predictive Horizon"]
   };
   return <PageCard title="Périmètre opérationnel" subtitle="Éléments couverts par cette rubrique dans TER v3.5."><div className="tagCloud">{(map[route] ?? []).map(x=><Pill key={x} tone="up">✓ {x}</Pill>)}</div><p className="muted" style={{marginBottom:0}}>Les données synthétiques sont toujours distinguées des données live. Les scénarios et alertes restent analytiques et ne déclenchent aucune exécution réelle.</p></PageCard>;
 }
@@ -534,6 +607,7 @@ function App() {
       : route === "data" ? <DataPage assets={assets} engineStatus={engineStatus} />
       : route === "workflow" ? <WorkflowPage />
       : route === "observability" ? <ObservabilityPage />
+      : route === "intelligence" ? <IntelligenceHub />
       : <SettingsPage />;
     return <div className="app appShell"><Sidebar route={route} navigate={navigate}/><div className="contentArea"><header className="topbar"><div><div className="brand"><Radar size={24}/> TER</div><div className="subtitle">Terminal d'Exploration des Risques · Market Intelligence</div></div><div className="status"><span className="dot"/> ENGINE ONLINE</div></header><div className="engineHealth"><span className="dot"/> REAL-TIME ENGINE · 60s<span>{engineStatus?.lastRefreshAt ? `Dernière mise à jour ${new Date(engineStatus.lastRefreshAt).toLocaleTimeString()}` : "Initialisation…"}</span></div><main className="pageMain"><PageCompleteness route={route}/>{page}</main></div></div>;
   }
