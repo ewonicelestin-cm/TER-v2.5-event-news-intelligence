@@ -36,7 +36,7 @@ const STALE_AFTER: Record<MarketAsset["assetClass"], number> = {
 };
 
 function quoteQuality(source: EngineSource, providerTimestamp: string, staleAfterSeconds: number) {
-  if (source === "synthetic") return { dataQuality: "ESTIMATED" as const, dataQualityScore: 85 };
+  if (source === "estimated") return { dataQuality: "ESTIMATED" as const, dataQualityScore: 85 };
   const age = Math.max(0, (Date.now() - Date.parse(providerTimestamp)) / 1000);
   if (!Number.isFinite(age)) return { dataQuality: "INVALID" as const, dataQualityScore: 0 };
   if (age > staleAfterSeconds) {

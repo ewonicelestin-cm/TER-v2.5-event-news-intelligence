@@ -13,8 +13,8 @@ let rules: AutomationRule[] = [
   { id: "RULE-default-quality", name: "Qualité dégradée", symbol: "*", logic: "ALL", conditions: [{ metric: "DATA_QUALITY_SCORE", operator: "<", value: 70 }], severity: "MEDIUM", enabled: true, cooldownMinutes: 30, createdAt: new Date().toISOString(), triggerCount: 0 }
 ];
 
-function compare(value: number, op: RuleOperator, target: number) { if (op === ">") return value > target; if (op === ">=") return value >= target; if (op === "<") return value < target; if (op === "<=") return value <= target; return value === target; }
-function metricValue(metric: RuleMetric, asset: MarketAsset, signal?: Signal) { if (metric === "SIGNAL_SCORE") return signal?.score ?? NaN; if (metric === "CONFIDENCE") return signal?.confidence ?? NaN; if (metric === "CHANGE_24H") return asset.change24h; if (metric === "DATA_QUALITY_SCORE") return asset.dataQualityScore ?? (asset.dataSource === "estimated" ? 45 : 0); return asset.price; }
+export function compare(value: number, op: RuleOperator, target: number) { if (op === ">") return value > target; if (op === ">=") return value >= target; if (op === "<") return value < target; if (op === "<=") return value <= target; return value === target; }
+export function metricValue(metric: RuleMetric, asset: MarketAsset, signal?: Signal) { if (metric === "SIGNAL_SCORE") return signal?.score ?? NaN; if (metric === "CONFIDENCE") return signal?.confidence ?? NaN; if (metric === "CHANGE_24H") return asset.change24h; if (metric === "DATA_QUALITY_SCORE") return asset.dataQualityScore ?? (asset.dataSource === "estimated" ? 45 : 0); return asset.price; }
 
 export function getAutomationRules() { return [...rules]; }
 export function addAutomationRule(input: Omit<AutomationRule, "id" | "createdAt" | "triggerCount">) { const row: AutomationRule = { ...input, id: `RULE-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, createdAt: new Date().toISOString(), triggerCount: 0 }; rules.unshift(row); return row; }

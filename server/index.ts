@@ -161,7 +161,19 @@ app.post("/api/workflows", (req, res) => {
 });
 app.patch("/api/workflows/:id", (req, res) => { const row = updateWorkflow(req.params.id, req.body ?? {}); if (!row) return res.status(404).json({ error: "workflow not found" }); res.json(row); });
 app.delete("/api/workflows/:id", (req, res) => res.json({ deleted: deleteWorkflow(req.params.id) }));
-app.post("/api/workflows/:id/run", (req, res) => { const row = runWorkflow(req.params.id, req.body?.dryRun !== false); if (!row) return res.status(404).json({ error: "workflow not found" }); recordAudit("workflow_run", { workflowId: req.params.id, dryRun: true, status: row.status }); res.json(row); });
+app.post("/api/workflows/:id/run", async (req, res) => {
+  const assets = await marketEngine.getMarkets();
+  const history = await historyBySymbol(assets);
+  const signals = rankSignals(generateSignals(assets, officialTraders, history));
+  const symbol = req.body?.symbol || "BTCUSD";
+  const asset = assets.find(a => a.symbol === symbol) || assets[0];
+  const signal = signals.find(s => s.symbol === asset.symbol);
+
+  const row = runWorkflow(req.params.id, req.body?.dryRun !== false, { asset, signal });
+  if (!row) return res.status(404).json({ error: "workflow not found" });
+  recordAudit("workflow_run", { workflowId: req.params.id, symbol: asset.symbol, dryRun: req.body?.dryRun !== false, status: row.status });
+  res.json(row);
+});
 app.get("/api/automation/rules", (_req, res) => res.json(getAutomationRules()));
 app.post("/api/automation/rules", (req, res) => {
   const body = req.body ?? {};
