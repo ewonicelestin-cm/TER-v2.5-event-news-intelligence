@@ -99,7 +99,7 @@ export async function insertPaperTrade(row: PaperTradeRow): Promise<void> {
   );
 }
 
-// v3.5 persistence and metrics
+// persistence and metrics
 export async function insertProviderHealth(provider: string, status: string, latency: number, success: number, failure: number): Promise<void> {
   warnIfNoDb();
   if (!pool) return;

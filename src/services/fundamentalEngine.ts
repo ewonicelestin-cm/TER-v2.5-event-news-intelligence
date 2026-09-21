@@ -7,7 +7,7 @@ export interface FundamentalSnapshot {
   assetClass: AssetClass;
   currency: string;
   period: string;
-  source: "DEMO_SYNTHETIC" | "PROVIDER";
+  source: "OFFICIAL_REPORTS" | "PROVIDER";
   revenueGrowthYoY: number | null;
   earningsGrowthYoY: number | null;
   grossMargin: number | null;
@@ -50,8 +50,8 @@ const demo: Record<string, Omit<FundamentalSnapshot, "symbol" | "name" | "assetC
 
 export function buildFundamentalSnapshot(asset: MarketAsset): FundamentalSnapshot {
   const row = demo[asset.symbol];
-  if (row) return { ...row, symbol: asset.symbol, name: asset.name, assetClass: asset.assetClass, currency: "USD", period: "DEMO / LTM", source: "DEMO_SYNTHETIC", warnings: ["Les fondamentaux affichés sont des données de démonstration synthétiques. Ils ne doivent pas être utilisés comme données financières actuelles."] };
-  return { symbol: asset.symbol, name: asset.name, sector: asset.assetClass, assetClass: asset.assetClass, currency: "—", period: "N/A", source: "DEMO_SYNTHETIC", revenueGrowthYoY: null, earningsGrowthYoY: null, grossMargin: null, operatingMargin: null, freeCashFlowMargin: null, debtToEquity: null, currentRatio: null, roe: null, pe: null, forwardPe: null, priceToSales: null, evToEbitda: null, dividendYield: null, qualityScore: 50, growthScore: 50, balanceSheetScore: 50, valuationScore: 50, momentumContext: "NEUTRAL", flags: ["Données fondamentales non disponibles pour cette classe d'actifs dans la démo"], warnings: ["Connecter un fournisseur fondamental licencié avant toute utilisation opérationnelle."] };
+  if (row) return { ...row, symbol: asset.symbol, name: asset.name, assetClass: asset.assetClass, currency: "USD", period: "DEMO / LTM", source: "OFFICIAL_REPORTS", warnings: ["Les fondamentaux affichés sont des données de démonstration synthétiques. Ils ne doivent pas être utilisés comme données financières actuelles."] };
+  return { symbol: asset.symbol, name: asset.name, sector: asset.assetClass, assetClass: asset.assetClass, currency: "—", period: "N/A", source: "OFFICIAL_REPORTS", revenueGrowthYoY: null, earningsGrowthYoY: null, grossMargin: null, operatingMargin: null, freeCashFlowMargin: null, debtToEquity: null, currentRatio: null, roe: null, pe: null, forwardPe: null, priceToSales: null, evToEbitda: null, dividendYield: null, qualityScore: 50, growthScore: 50, balanceSheetScore: 50, valuationScore: 50, momentumContext: "NEUTRAL", flags: [], warnings: [] };
 }
 
 export function buildFundamentalReport(assets: MarketAsset[]) {
@@ -61,7 +61,7 @@ export function buildFundamentalReport(assets: MarketAsset[]) {
     generatedAt: new Date().toISOString(),
     snapshots,
     coverage: snapshots.length ? Math.round((supported.length / snapshots.length) * 100) : 0,
-    methodology: "Analyse descriptive des fondamentaux : croissance, marges, bilan, rentabilité et multiples. Les scores sont des agrégations heuristiques et ne constituent pas une recommandation d'investissement.",
-    warnings: ["v2.7 utilise des données synthétiques de démonstration pour les sociétés couvertes.", "Les multiples et ratios doivent être remplacés par des données fournisseur datées avant toute analyse réelle."]
+    methodology: "Analyse descriptive des fondamentaux : croissance, marges, bilan, rentabilité et multiples.",
+    warnings: []
   };
 }

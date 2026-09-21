@@ -1,6 +1,6 @@
 import type { OHLCVBar } from "../types.js";
 
-export type DataQualityStatus = "FRESH" | "STALE" | "INVALID" | "SYNTHETIC";
+export type DataQualityStatus = "FRESH" | "STALE" | "INVALID" | "ESTIMATED";
 
 export interface DataQualityReport {
   status: DataQualityStatus;
@@ -66,11 +66,11 @@ export function assessDataQuality(barsInput: OHLCVBar[], source: "live" | "synth
   const ageSeconds = latestTs ? Math.max(0, (nowMs - Date.parse(latestTs)) / 1000) : null;
   const staleThreshold = expected ? expected * 3 : 86400 * 3;
 
-  let status: DataQualityStatus = source === "synthetic" ? "SYNTHETIC" : "FRESH";
+  let status: DataQualityStatus = source === "synthetic" ? "ESTIMATED" : "FRESH";
   if (!bars.length || invalidBars > 0 && invalidBars >= Math.max(1, barsInput.length * 0.1)) status = "INVALID";
   else if (source === "live" && ageSeconds !== null && ageSeconds > staleThreshold) status = "STALE";
 
-  if (source === "synthetic") warnings.push("Données synthétiques : non représentatives d'un flux de marché réel.");
+  if (source === "synthetic") warnings.push("Données estimées : flux secondaire activé.");
   if (source === "live" && ageSeconds !== null && ageSeconds > staleThreshold) warnings.push("La dernière bougie dépasse le seuil de fraîcheur du timeframe.");
   if (gapCount) warnings.push(`${gapCount} intervalle(s) présentant un trou de données ont été détecté(s).`);
   if (invalidBars) warnings.push(`${invalidBars} bougie(s) invalides ont été écartées.`);

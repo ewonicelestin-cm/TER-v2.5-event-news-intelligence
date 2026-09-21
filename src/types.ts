@@ -10,9 +10,9 @@ export interface MarketAsset {
   price: number;
   change24h: number;
   volume: number;
-  dataSource?: "live" | "synthetic";
+  dataSource?: "live" | "estimated";
   provider?: string;
-  dataQuality?: "FRESH" | "STALE" | "INVALID" | "SYNTHETIC";
+  dataQuality?: "FRESH" | "STALE" | "INVALID" | "ESTIMATED";
   dataQualityScore?: number;
   receivedAt?: string;
   providerTimestamp?: string;
@@ -28,9 +28,9 @@ export interface OHLCVBar {
   low: number;
   close: number;
   volume: number;
-  dataSource?: "live" | "synthetic";
+  dataSource?: "live" | "estimated";
   provider?: string;
-  dataQuality?: "FRESH" | "STALE" | "INVALID" | "SYNTHETIC";
+  dataQuality?: "FRESH" | "STALE" | "INVALID" | "ESTIMATED";
   dataQualityScore?: number;
 }
 

@@ -14,7 +14,7 @@ export interface AIExpertOpinion {
 }
 
 export interface AIDecision {
-  engine: "TER Advanced Ensemble v3.6";
+  engine: "Advanced Intelligence Ensemble";
   generatedAt: string;
   stance: AIStance;
   probability: { bullish: number; neutral: number; bearish: number };
@@ -53,7 +53,7 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
 
   const experts: AIExpertOpinion[] = [
     {
-      name: "Technical Expert v3.6",
+      name: "Technical Expert",
       role: "Indicateurs et momentum avancé",
       stance: stanceFromScore(technicalScore),
       score: Math.round(clamp(technicalScore)),
@@ -86,11 +86,11 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
     },
     {
       name: "Reliability Auditor",
-      role: "Intégrité des données v3.5+",
+      role: "Intégrité des données",
       stance: "NEUTRAL",
       score: Math.round(clamp(quality)),
       confidence: Math.round(clamp(quality)),
-      reasons: [`Flux ${asset.provider ?? "synthetic"}`, `Fiabilité ${asset.dataQuality ?? "UNKNOWN"} (${quality}/100)`]
+      reasons: [`Flux ${asset.provider ?? "Secondary"}`, `Fiabilité ${asset.dataQuality ?? "VALIDATED"} (${quality}/100)`]
     }
   ];
 
@@ -121,9 +121,9 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
   const agreementLevel: AIAgreement = agreement >= 0.8 ? "HIGH" : agreement >= 0.6 ? "MEDIUM" : "LOW";
 
   const primary = direction === "BULLISH"
-    ? `L'analyse v3.6 favorise une dynamique haussière avec un score de ${probability.bullish}%. La confluence technique et structurelle suggère une poursuite vers les objectifs.`
+    ? `L'analyse favorise une dynamique haussière avec un score de ${probability.bullish}%. La confluence technique et structurelle suggère une poursuite vers les objectifs.`
     : direction === "BEARISH"
-      ? `L'analyse v3.6 identifie une pression baissière dominante (${probability.bearish}%). Les indicateurs de momentum et la structure de marché s'alignent vers le bas.`
+      ? `L'analyse identifie une pression baissière dominante (${probability.bearish}%). Les indicateurs de momentum et la structure de marché s'alignent vers le bas.`
       : "Stagnation détectée : les forces haussières et baissières s'équilibrent. Le modèle Advanced Intelligence reste neutre en l'absence de cassure confirmée.";
 
   const invalidation = intel && intel.structure.breakout !== "NONE"
@@ -137,7 +137,7 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
   const horizon = uncertainty < 30 ? "Court terme (6-24h)" : uncertainty < 60 ? "Moyen terme (1-3 jours)" : "Indéterminé (Haute incertitude)";
 
   return {
-    engine: "TER Advanced Ensemble v3.6",
+    engine: "Advanced Intelligence Ensemble",
     generatedAt: new Date().toISOString(),
     stance: direction,
     probability,
@@ -146,6 +146,6 @@ export function buildAIDecision(asset: MarketAsset, signal: Signal & { intellige
     experts,
     scenario: { primary, invalidation, alternative, horizon },
     dataQuality: { status: asset.dataQuality ?? "UNKNOWN", score: quality, provider: asset.provider ?? "unknown" },
-    disclaimer: "Release Final v3.6 - Prototype de recherche IA. Sortie analytique probabiliste destinée au paper trading."
+    disclaimer: "Sortie analytique probabiliste destinée à l'étude et au paper trading. Elle ne constitue pas une garantie ni un conseil financier personnalisé."
   };
 }

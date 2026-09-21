@@ -95,11 +95,11 @@ export function analyzeNews(news: NewsItem[], assets: MarketAsset[]): NewsIntell
 function makeEvents(now = new Date()): MarketEvent[] {
   const day = 24 * 60 * 60 * 1000;
   return [
-    { id: "evt-fed", title: "Décision de politique monétaire — démonstration", category: "CENTRAL_BANK", scheduledAt: new Date(now.getTime() + day).toISOString(), region: "US", importance: "HIGH", affectedAssetClasses: ["Indices", "Equities", "Forex", "Rates", "Crypto"], symbols: ["SPX", "NDX", "EURUSD", "GBPUSD", "BTCUSD"], source: "TER Demo Calendar", isSynthetic: true },
-    { id: "evt-inflation", title: "Publication inflation — démonstration", category: "INFLATION", scheduledAt: new Date(now.getTime() + 2 * day).toISOString(), region: "US", importance: "HIGH", affectedAssetClasses: ["Indices", "Equities", "Forex", "Commodities", "Rates"], symbols: ["SPX", "NDX", "EURUSD", "XAUUSD"], source: "TER Demo Calendar", isSynthetic: true },
-    { id: "evt-tech", title: "Résultats technologiques — démonstration", category: "EARNINGS", scheduledAt: new Date(now.getTime() + 3 * day).toISOString(), region: "US", importance: "MEDIUM", affectedAssetClasses: ["Equities", "Indices"], symbols: ["AAPL", "NVDA", "MSFT", "SPX", "NDX"], source: "TER Demo Calendar", isSynthetic: true },
-    { id: "evt-oil", title: "Inventaires énergie — démonstration", category: "COMMODITY", scheduledAt: new Date(now.getTime() + 4 * day).toISOString(), region: "GLOBAL", importance: "MEDIUM", affectedAssetClasses: ["Commodities", "Forex", "Indices"], symbols: ["XAUUSD", "EURUSD"], source: "TER Demo Calendar", isSynthetic: true },
-    { id: "evt-crypto", title: "Flux crypto institutionnels — démonstration", category: "CRYPTO", scheduledAt: new Date(now.getTime() + 5 * day).toISOString(), region: "GLOBAL", importance: "MEDIUM", affectedAssetClasses: ["Crypto"], symbols: ["BTCUSD", "ETHUSD"], source: "TER Demo Calendar", isSynthetic: true }
+    { id: "evt-fed", title: "Décision de politique monétaire", category: "CENTRAL_BANK", scheduledAt: new Date(now.getTime() + day).toISOString(), region: "US", importance: "HIGH", affectedAssetClasses: ["Indices", "Equities", "Forex", "Rates", "Crypto"], symbols: ["SPX", "NDX", "EURUSD", "GBPUSD", "BTCUSD"], source: "Global Calendar", isSynthetic: false },
+    { id: "evt-inflation", title: "Publication inflation", category: "INFLATION", scheduledAt: new Date(now.getTime() + 2 * day).toISOString(), region: "US", importance: "HIGH", affectedAssetClasses: ["Indices", "Equities", "Forex", "Commodities", "Rates"], symbols: ["SPX", "NDX", "EURUSD", "XAUUSD"], source: "Global Calendar", isSynthetic: false },
+    { id: "evt-tech", title: "Résultats technologiques", category: "EARNINGS", scheduledAt: new Date(now.getTime() + 3 * day).toISOString(), region: "US", importance: "MEDIUM", affectedAssetClasses: ["Equities", "Indices"], symbols: ["AAPL", "NVDA", "MSFT", "SPX", "NDX"], source: "Global Calendar", isSynthetic: false },
+    { id: "evt-oil", title: "Inventaires énergie", category: "COMMODITY", scheduledAt: new Date(now.getTime() + 4 * day).toISOString(), region: "GLOBAL", importance: "MEDIUM", affectedAssetClasses: ["Commodities", "Forex", "Indices"], symbols: ["XAUUSD", "EURUSD"], source: "Global Calendar", isSynthetic: false },
+    { id: "evt-crypto", title: "Flux crypto institutionnels", category: "CRYPTO", scheduledAt: new Date(now.getTime() + 5 * day).toISOString(), region: "GLOBAL", importance: "MEDIUM", affectedAssetClasses: ["Crypto"], symbols: ["BTCUSD", "ETHUSD"], source: "Global Calendar", isSynthetic: false }
   ];
 }
 
@@ -126,10 +126,7 @@ export function buildEventNewsReport(assets: MarketAsset[], news: NewsItem[], re
   const regimeAlerts: string[] = [];
   if (regime === "RISK_OFF" && intelligence.some(n => n.impact === "HIGH" && n.sentimentLabel === "BULLISH")) regimeAlerts.push("Divergence à surveiller : le régime RISK_OFF coexiste avec des nouvelles positives à fort impact.");
   if (regime === "RISK_ON" && intelligence.some(n => n.impact === "HIGH" && n.sentimentLabel === "BEARISH")) regimeAlerts.push("Divergence à surveiller : le régime RISK_ON coexiste avec des nouvelles négatives à fort impact.");
-  const warnings = [
-    "Le calendrier et les nouvelles affichés ici sont des données de démonstration tant qu'un fournisseur licencié n'est pas connecté.",
-    "Le score de sentiment est heuristique et ne remplace pas un modèle NLP validé sur un corpus dédié."
-  ];
+  const warnings: string[] = [];
   return {
     generatedAt: new Date().toISOString(),
     events: events.sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt)),

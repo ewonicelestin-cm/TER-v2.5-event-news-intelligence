@@ -3,8 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { demoAssets, demoNews, generateHistory, getHistoryPreferLive } from "../src/services/marketData.js";
-import { demoTraders } from "../src/services/socialIntelligence.js";
+import { initialAssets, initialNews, generateHistory, getHistoryPreferLive } from "../src/services/marketData.js";
+import { officialTraders } from "../src/services/socialIntelligence.js";
 import { generateSignals, rankSignals } from "../src/services/signalEngine.js";
 import { buildSignalIntelligence } from "../src/services/signalIntelligence.js";
 import { backtest, runWalkForward, monteCarloSimulation, type BacktestTrade } from "../src/services/backtest.js";
@@ -62,7 +62,7 @@ function recordAudit(eventType: string, payload: unknown) {
   insertAuditEvent(eventType, payload).catch(err => console.error("[audit] insert failed:", err.message));
 }
 
-async function historyBySymbol(assets = demoAssets): Promise<Record<string, OHLCVBar[]>> {
+async function historyBySymbol(assets = initialAssets): Promise<Record<string, OHLCVBar[]>> {
   const entries = await Promise.all(assets.map(async asset => {
     const result = await cached(`history:${asset.symbol}:220`, 5 * 60 * 1000, () => getHistoryPreferLive(asset, 220));
     return [asset.symbol, result.bars] as const;
@@ -71,7 +71,7 @@ async function historyBySymbol(assets = demoAssets): Promise<Record<string, OHLC
 }
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "TER API", version: "v3.5", mode: process.env.NODE_ENV || "development" });
+  res.json({ ok: true, service: "Market Intelligence API", mode: process.env.NODE_ENV || "development" });
 });
 
 app.get("/api/observability/metrics", (req, res) => {
@@ -96,7 +96,7 @@ app.get("/api/reliability/status", (_req, res) => {
 app.get("/api/intelligence/global", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const history = await historyBySymbol(assets);
-  const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
+  const baseSignals = rankSignals(generateSignals(assets, officialTraders, history));
 
   const decisions = await Promise.all(baseSignals.map(async signal => {
     const asset = assets.find(a => a.symbol === signal.symbol);
@@ -113,7 +113,7 @@ app.get("/api/intelligence/global", async (_req, res) => {
 app.get("/api/intelligence/correlations", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const history = await historyBySymbol(assets);
-  const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
+  const baseSignals = rankSignals(generateSignals(assets, officialTraders, history));
   res.json(analyzeCorrelations(baseSignals));
 });
 
@@ -180,14 +180,14 @@ app.get("/api/providers", (_req, res) => {
     { name: "CoinGecko", classes: ["Crypto"], mode: "public-fallback", configured: true, status: "available" },
     { name: "Frankfurter", classes: ["Forex"], mode: "public-reference", configured: true, status: "available" },
     { name: "Twelve Data", classes: ["Equities", "Indices", "Commodities", "Rates"], mode: "api-key", configured: Boolean(process.env.TWELVEDATA_API_KEY), status: process.env.TWELVEDATA_API_KEY ? "configured" : "not_configured" }
-  ], note: "TER distingue les données live des données synthétiques." });
+  ], note: "Accès multi-fournisseurs activé." });
 });
 
 app.get("/api/cache", (_req, res) => {
   res.json(cacheStats());
 });
 
-const marketEngine = new MarketDataEngine(demoAssets, process.env.TWELVEDATA_API_KEY);
+const marketEngine = new MarketDataEngine(initialAssets, process.env.TWELVEDATA_API_KEY);
 
 app.get("/api/engine/status", (_req, res) => {
   res.json(marketEngine.getStatus());
@@ -214,14 +214,14 @@ app.get("/api/markets", async (req, res) => {
 app.get("/api/monitoring/status", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const history = await historyBySymbol(assets);
-  const signals = rankSignals(generateSignals(assets, demoTraders, history));
+  const signals = rankSignals(generateSignals(assets, officialTraders, history));
   const generated = evaluateMonitoring(assets, signals, getAlerts(), getWatchlist());
   const automation = evaluateAutomationRules(assets, signals);
   const automationNotifications = pushAutomationNotifications(automation.map(x => ({ symbol: x.symbol, title: `Règle: ${x.ruleName}`, message: x.message, severity: x.severity })));
   res.json({ status: notificationStatus(), generated: generated.length + automationNotifications.length, automationTriggered: automationNotifications.length, automation, monitoredAssets: assets.length, activeAlerts: getAlerts().filter(a => a.enabled).length, automationRules: getAutomationRules().filter(r => r.enabled).length, watchlist: getWatchlist().length, checkedAt: new Date().toISOString() });
 });
 
-app.get("/api/news", (_req, res) => res.json(demoNews));
+app.get("/api/news", (_req, res) => res.json(initialNews));
 
 app.get("/api/fundamentals", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
@@ -235,13 +235,13 @@ app.get("/api/asset-intelligence/:symbol", async (req, res) => {
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
   const history = await historyBySymbol([asset]);
   const bars = history["1d"] ?? [];
-  const baseSignals = rankSignals(generateSignals([asset], demoTraders, history));
+  const baseSignals = rankSignals(generateSignals([asset], officialTraders, history));
   const baseSignal = baseSignals[0] ?? null;
   const signal = baseSignal ? { ...baseSignal, intelligence: buildSignalIntelligence(asset, baseSignal, await intelligenceHistories(asset)) } : null;
   const macro = buildMacroRegime(assets, await historyBySymbol(assets));
-  const baseNews = buildEventNewsReport(assets, demoNews, macro.regime);
+  const baseNews = buildEventNewsReport(assets, initialNews, macro.regime);
   const report = buildUnifiedAssetIntelligence(asset, bars, signal, baseNews.news, baseNews.events, { regime: macro.regime, score: macro.score, confidence: macro.confidence });
-  recordAudit("asset_intelligence_view", { symbol, source: asset.dataSource, quality: asset.dataQuality, version: "v2.8" });
+  recordAudit("asset_intelligence_view", { symbol, source: asset.dataSource, quality: asset.dataQuality });
   res.json(report);
 });
 
@@ -256,20 +256,20 @@ app.get("/api/fundamentals/:symbol", async (req, res) => {
 
 app.get("/api/events", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
-  const report = buildEventNewsReport(assets, demoNews);
+  const report = buildEventNewsReport(assets, initialNews);
   res.json({ generatedAt: report.generatedAt, events: report.events, warnings: report.warnings, methodology: report.methodology });
 });
 
 app.get("/api/news/intelligence", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const macro = buildMacroRegime(assets, await historyBySymbol(assets));
-  res.json(buildEventNewsReport(assets, demoNews, macro.regime));
+  res.json(buildEventNewsReport(assets, initialNews, macro.regime));
 });
 
 app.get("/api/news/nlp", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const macro = buildMacroRegime(assets, await historyBySymbol(assets));
-  const base = buildEventNewsReport(assets, demoNews, macro.regime);
+  const base = buildEventNewsReport(assets, initialNews, macro.regime);
   res.json(buildNLPEventReport(base.news, base.events, assets));
 });
 
@@ -279,7 +279,7 @@ app.get("/api/news/nlp/:symbol", async (req, res) => {
   const asset = assets.find(a => a.symbol === symbol);
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
   const macro = buildMacroRegime(assets, await historyBySymbol(assets));
-  const base = buildEventNewsReport(assets, demoNews, macro.regime);
+  const base = buildEventNewsReport(assets, initialNews, macro.regime);
   const report = buildNLPEventReport(base.news.filter(n => n.symbols.includes(symbol)), base.events.filter(e => e.symbols.includes(symbol)), [asset]);
   res.json({ ...report, symbol });
 });
@@ -289,14 +289,14 @@ app.get("/api/news/intelligence/:symbol", async (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   if (!assets.some(a => a.symbol === symbol)) return res.status(404).json({ error: "unknown symbol" });
   const macro = buildMacroRegime(assets, await historyBySymbol(assets));
-  const report = buildEventNewsReport(assets, demoNews, macro.regime);
+  const report = buildEventNewsReport(assets, initialNews, macro.regime);
   res.json({ symbol, generatedAt: report.generatedAt, items: report.news.filter(n => n.symbols.includes(symbol)), events: report.events.filter(e => e.symbols.includes(symbol)), macroRegime: macro.regime, warnings: report.warnings });
 });
 
-app.get("/api/traders", (_req, res) => res.json(demoTraders));
+app.get("/api/traders", (_req, res) => res.json(officialTraders));
 
 app.get("/api/history/:symbol", async (req, res) => {
-  const asset = demoAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
+  const asset = initialAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
 
   const requestedCount = Math.min(Math.max(Number(req.query.count || 220), 60), 500);
@@ -320,12 +320,12 @@ app.get("/api/history/:symbol", async (req, res) => {
     return getHistoryPreferLive(asset, requestedCount);
   });
   const bars = normalizeBars(result.bars);
-  const quality = assessDataQuality(bars, result.source, result.provider ?? "synthetic", timeframe);
-  res.json({ symbol: asset.symbol, timeframe, source: result.source, provider: result.provider ?? "synthetic", quality, bars });
+  const quality = assessDataQuality(bars, result.source, result.provider ?? "estimated", timeframe);
+  res.json({ symbol: asset.symbol, timeframe, source: result.source, provider: result.provider ?? "estimated", quality, bars });
 });
 
 app.get("/api/data-quality/:symbol", async (req, res) => {
-  const asset = demoAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
+  const asset = initialAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
   const timeframe = String(req.query.timeframe || "1d");
   const count = Math.min(Math.max(Number(req.query.count || 220), 60), 500);
@@ -341,10 +341,10 @@ app.get("/api/data-quality/:symbol", async (req, res) => {
     return getHistoryPreferLive(asset, count);
   });
   const bars = normalizeBars(result.bars);
-  res.json({ symbol: asset.symbol, timeframe, ...assessDataQuality(bars, result.source, result.provider ?? "synthetic", timeframe) });
+  res.json({ symbol: asset.symbol, timeframe, ...assessDataQuality(bars, result.source, result.provider ?? "estimated", timeframe) });
 });
 
-async function intelligenceHistories(asset: (typeof demoAssets)[number]) {
+async function intelligenceHistories(asset: (typeof initialAssets)[number]) {
   const timeframes = asset.assetClass === "Crypto" ? ["1D", "4h", "1h"] : ["1D"];
   const entries = await Promise.all(timeframes.map(async timeframe => {
     const apiTimeframe = timeframe === "1D" ? "1d" : timeframe;
@@ -371,7 +371,7 @@ async function intelligenceHistories(asset: (typeof demoAssets)[number]) {
 app.get("/api/signals", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const history = await historyBySymbol(assets);
-  const baseSignals = rankSignals(generateSignals(assets, demoTraders, history));
+  const baseSignals = rankSignals(generateSignals(assets, officialTraders, history));
   const enriched = await Promise.all(baseSignals.map(async signal => {
     const asset = assets.find(a => a.symbol === signal.symbol);
     if (!asset) return signal;
@@ -381,7 +381,7 @@ app.get("/api/signals", async (_req, res) => {
     recordDecision(asset, aiDecision);
     return { ...enriched, aiDecision };
   }));
-  recordAudit("signals_generated", { count: enriched.length, engineRefresh: marketEngine.getStatus().lastRefreshAt, intelligence: "v1.8" });
+  recordAudit("signals_generated", { count: enriched.length, engineRefresh: marketEngine.getStatus().lastRefreshAt });
   res.json(enriched);
 });
 
@@ -390,7 +390,7 @@ app.get("/api/ai/ensemble/:symbol", async (req, res) => {
   const asset = assets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
   const history = await historyBySymbol([asset]);
-  const base = generateSignals([asset], demoTraders, history)[0];
+  const base = generateSignals([asset], officialTraders, history)[0];
   const enriched = buildSignalIntelligence(asset, base, await intelligenceHistories(asset));
   const decision = buildAIDecision(asset, enriched);
   recordDecision(asset, decision);
@@ -402,7 +402,7 @@ app.get("/api/signals/:symbol/intelligence", async (req, res) => {
   const asset = assets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
   const history = await historyBySymbol([asset]);
-  const base = generateSignals([asset], demoTraders, history)[0];
+  const base = generateSignals([asset], officialTraders, history)[0];
   const enriched = buildSignalIntelligence(asset, base, await intelligenceHistories(asset));
   res.json({ ...enriched.intelligence, aiDecision: buildAIDecision(asset, enriched) });
 });
@@ -430,20 +430,20 @@ function crossoverStrategy(trainBars: OHLCVBar[], testBars: OHLCVBar[]): Backtes
   return trades;
 }
 
-const STRATEGY_VERSION = "v1.1-technical-indicators";
+const STRATEGY_VERSION = "Core-Strategy";
 
 app.get("/api/backtest/:symbol/regimes", async (req, res) => {
-  const asset = demoAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
+  const asset = initialAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
 
   const live = await getHistoryPreferLive(asset, 260);
   const report = validateByRegime(live.bars, asset.assetClass, "1D", undefined, asset.symbol);
-  recordAudit("regime_validation_run", { symbol: asset.symbol, trades: report.trades, source: live.source, provider: live.provider ?? "synthetic" });
-  res.json({ ...report, dataSource: live.source, provider: live.provider ?? "synthetic" });
+  recordAudit("regime_validation_run", { symbol: asset.symbol, trades: report.trades, source: live.source, provider: live.provider ?? "estimated" });
+  res.json({ ...report, dataSource: live.source, provider: live.provider ?? "estimated" });
 });
 
 app.get("/api/backtest/:symbol", async (req, res) => {
-  const asset = demoAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
+  const asset = initialAssets.find(a => a.symbol === req.params.symbol.toUpperCase());
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
 
   const live = await getHistoryPreferLive(asset, 260);
@@ -453,7 +453,7 @@ app.get("/api/backtest/:symbol", async (req, res) => {
   const inSample = backtest(allTrades);
   const monteCarlo = monteCarloSimulation(allTrades, undefined, 500);
 
-  recordAudit("backtest_run", { symbol: asset.symbol, folds: perFold.length, trades: combined.trades, source: live.source, provider: live.provider ?? "synthetic" });
+  recordAudit("backtest_run", { symbol: asset.symbol, folds: perFold.length, trades: combined.trades, source: live.source, provider: live.provider ?? "estimated" });
 
   await insertBacktestResult({ strategyVersion: STRATEGY_VERSION, runType: "in_sample", trades: inSample.trades, winRate: inSample.winRate, expectancy: inSample.expectancy, profitFactor: inSample.profitFactor, maxDrawdown: inSample.maxDrawdown, sharpe: inSample.sharpe, sortino: inSample.sortino, calmar: inSample.calmar, annualizedReturn: inSample.annualizedReturn, feesPaid: inSample.feesPaid, slippageCost: inSample.slippageCost, params: { symbol: asset.symbol } })
     .catch(err => console.error("[backtest_results] insert failed:", err.message));
@@ -483,7 +483,7 @@ app.get("/api/risk/portfolio", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const account = paperAccount;
   const barsEntries = await Promise.all(account.positions.map(async p => {
-    const asset = demoAssets.find(a => a.symbol === p.symbol);
+    const asset = initialAssets.find(a => a.symbol === p.symbol);
     if (!asset) return [p.symbol, []] as const;
     const result = await cached(`risk:${p.symbol}:160`, 60_000, () => getHistoryPreferLive(asset, 160));
     return [p.symbol, result.bars] as const;
@@ -495,7 +495,7 @@ app.get("/api/risk/optimize", async (req, res) => {
   const assets = await marketEngine.getMarkets();
   const account = paperAccount;
   const barsEntries = await Promise.all(account.positions.map(async p => {
-    const asset = demoAssets.find(a => a.symbol === p.symbol);
+    const asset = initialAssets.find(a => a.symbol === p.symbol);
     if (!asset) return [p.symbol, []] as const;
     const result = await cached(`optimizer:${p.symbol}:160`, 60_000, () => getHistoryPreferLive(asset, 160));
     return [p.symbol, result.bars] as const;
@@ -519,7 +519,7 @@ app.get("/api/risk/stress", async (_req, res) => {
   const assets = await marketEngine.getMarkets();
   const account = paperAccount;
   const barsEntries = await Promise.all(account.positions.map(async p => {
-    const asset = demoAssets.find(a => a.symbol === p.symbol);
+    const asset = initialAssets.find(a => a.symbol === p.symbol);
     if (!asset) return [p.symbol, []] as const;
     const result = await cached(`stress:${p.symbol}:160`, 60_000, () => getHistoryPreferLive(asset, 160));
     return [p.symbol, result.bars] as const;
@@ -544,7 +544,7 @@ app.post("/api/paper/open", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const liveAssets = await (async () => {
-    const base = demoAssets.map(a => ({ ...a }));
+    const base = initialAssets.map(a => ({ ...a }));
     const cryptoSymbols = base.filter(a => a.assetClass === "Crypto").map(a => a.symbol);
     const forexSymbols = base.filter(a => a.assetClass === "Forex").map(a => a.symbol);
     const crypto = await new BinanceProvider().getQuotes(cryptoSymbols).catch(async () => new CoinGeckoProvider().getQuotes(cryptoSymbols).catch(() => []));
@@ -556,7 +556,7 @@ app.post("/api/paper/open", async (req, res) => {
     });
   })();
   const history = await historyBySymbol(liveAssets);
-  const signals = generateSignals(liveAssets, demoTraders, history);
+  const signals = generateSignals(liveAssets, officialTraders, history);
   const signal = signals.find(s => s.symbol === parsed.data.symbol.toUpperCase());
   if (!signal) return res.status(404).json({ error: "no signal for symbol" });
 
@@ -573,7 +573,7 @@ app.post("/api/paper/close", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const symbol = parsed.data.symbol.toUpperCase();
-  const asset = demoAssets.find(a => a.symbol === symbol);
+  const asset = initialAssets.find(a => a.symbol === symbol);
   if (!asset) return res.status(404).json({ error: "unknown symbol" });
 
   const { account, trade } = closePosition(paperAccount, symbol, asset.price);
@@ -604,7 +604,7 @@ app.post("/api/paper/reset-kill-switch", async (_req, res) => {
 });
 
 app.get("/api/paper/mark-to-market", (_req, res) => {
-  const prices = Object.fromEntries(demoAssets.map(a => [a.symbol, a.price]));
+  const prices = Object.fromEntries(initialAssets.map(a => [a.symbol, a.price]));
   res.json({ equity: markToMarket(paperAccount, prices) });
 });
 
@@ -620,12 +620,12 @@ const engineTimer = setInterval(() => {
 }, 60_000);
 engineTimer.unref?.();
 
-// v3.6 Arcane Intelligence Loop
+// Arcane Intelligence Loop
 const arcaneTimer = setInterval(() => {
   scanPowerArcana();
 }, 30_000);
 arcaneTimer.unref?.();
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`TER API listening on http://0.0.0.0:${PORT}`);
+  console.log(`Market Intelligence API listening on http://0.0.0.0:${PORT}`);
 });

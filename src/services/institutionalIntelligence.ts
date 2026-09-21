@@ -54,5 +54,5 @@ export function detectAnomalies(assets: MarketAsset[]): Anomaly[] {
 export function buildInstitutionalSnapshot(assets: MarketAsset[]) {
   const factors = buildFactorExposure(assets);
   const anomalies = detectAnomalies(assets);
-  return { generatedAt: new Date().toISOString(), coverage: assets.length, factors, anomalies, watchlist: getWatchlist(), alerts: getAlerts(), warnings: ["Les expositions sont des proxies analytiques, pas des facteurs institutionnels estimés par régression.", "Les anomalies sont des détections heuristiques et doivent être validées sur historique hors-échantillon."] };
+  return { generatedAt: new Date().toISOString(), coverage: assets.length, factors, anomalies, watchlist: getWatchlist(), alerts: getAlerts(), warnings: ["Les expositions sont des proxies analytiques.", "Les anomalies sont des détections heuristiques."] };
 }

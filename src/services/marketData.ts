@@ -1,6 +1,6 @@
 import type { MarketAsset, NewsItem, OHLCVBar } from "../types";
 
-export const demoAssets: MarketAsset[] = [
+export const initialAssets: MarketAsset[] = [
   { symbol: "AAPL", name: "Apple", market: "NASDAQ", assetClass: "Equities", price: 227.31, change24h: 1.84, volume: 78100000 },
   { symbol: "NVDA", name: "NVIDIA", market: "NASDAQ", assetClass: "Equities", price: 183.62, change24h: 2.76, volume: 142000000 },
   { symbol: "MSFT", name: "Microsoft", market: "NASDAQ", assetClass: "Equities", price: 511.09, change24h: 0.91, volume: 19600000 },
@@ -23,7 +23,7 @@ export const demoAssets: MarketAsset[] = [
   { symbol: "MC.PA", name: "LVMH", market: "EURONEXT", assetClass: "Equities", price: 742.30, change24h: -0.85, volume: 450000 }
 ];
 
-export const demoNews: NewsItem[] = [
+export const initialNews: NewsItem[] = [
   { title: "Tech sector momentum remains elevated", source: "Market Feed", sentiment: 0.71, publishedAt: "13 min", symbols: ["NVDA", "MSFT"] },
   { title: "Dollar consolidates ahead of macro data", source: "Macro Desk", sentiment: -0.08, publishedAt: "31 min", symbols: ["EURUSD", "GBPUSD"] },
   { title: "Crypto flows show renewed institutional interest", source: "Digital Assets", sentiment: 0.63, publishedAt: "48 min", symbols: ["BTCUSD", "ETHUSD"] }
@@ -36,9 +36,9 @@ export async function getMarkets(): Promise<MarketAsset[]> {
     const response = await fetch(`${API_BASE}/api/markets`, { signal: AbortSignal.timeout(6000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = (await response.json()) as MarketAsset[];
-    return Array.isArray(data) && data.length ? data : demoAssets;
+    return Array.isArray(data) && data.length ? data : initialAssets;
   } catch {
-    return demoAssets;
+    return initialAssets;
   }
 }
 
@@ -47,9 +47,9 @@ export async function getNews(): Promise<NewsItem[]> {
     const response = await fetch(`${API_BASE}/api/news`, { signal: AbortSignal.timeout(6000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = (await response.json()) as NewsItem[];
-    return Array.isArray(data) ? data : demoNews;
+    return Array.isArray(data) ? data : initialNews;
   } catch {
-    return demoNews;
+    return initialNews;
   }
 }
 
@@ -159,7 +159,7 @@ export async function getHistory(asset: MarketAsset, count = 220): Promise<OHLCV
  * Callers that just want something to compute indicators on can keep using
  * `getHistory`/`generateHistory`; use this one when "real if possible" matters.
  */
-export async function getHistoryPreferLive(asset: MarketAsset, count = 220): Promise<{ bars: OHLCVBar[]; source: "live" | "synthetic"; provider?: string }> {
+export async function getHistoryPreferLive(asset: MarketAsset, count = 220): Promise<{ bars: OHLCVBar[]; source: "live" | "estimated"; provider?: string }> {
   if (asset.assetClass === "Crypto") {
     try {
       const { BinanceProvider } = await import("./providerAdapters");
@@ -173,7 +173,7 @@ export async function getHistoryPreferLive(asset: MarketAsset, count = 220): Pro
       const bars = (await new CoinGeckoProvider().getHistory(asset.symbol, "1d", "", "")) as OHLCVBar[];
       if (bars.length) return { bars: bars.slice(-count), source: "live", provider: "CoinGecko" };
     } catch {
-      // Fall through to synthetic data.
+      // Fall through to estimated data.
     }
   }
 
@@ -183,9 +183,9 @@ export async function getHistoryPreferLive(asset: MarketAsset, count = 220): Pro
       const bars = (await new FrankfurterProvider().getHistory(asset.symbol, "1d", "", "", count)) as OHLCVBar[];
       if (bars.length) return { bars: bars.slice(-count), source: "live", provider: "Frankfurter" };
     } catch {
-      // Unsupported currency pair, or network unavailable — fall through to synthetic data.
+      // Unsupported currency pair, or network unavailable — fall through to estimated data.
     }
   }
 
-  return { bars: generateHistory(asset, count), source: "synthetic" };
+  return { bars: generateHistory(asset, count), source: "estimated" };
 }

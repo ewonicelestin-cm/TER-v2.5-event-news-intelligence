@@ -121,7 +121,7 @@ export function buildSignalIntelligence(
     confluenceScore: score, confluence, evidence, divergences, structure: st,
     trace: {
       generatedAt: new Date().toISOString(),
-      engine: "TER Signal Intelligence v1.8",
+      engine: "Signal Intelligence Engine",
       dataSymbols: Object.keys(histories),
       indicators: ["RSI", "ADX", "EMA20/EMA50", "MACD", "ATR", "Bollinger", "Volume", "RSI divergence", "Support/Resistance"]
     }

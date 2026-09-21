@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Activity, Bell, BrainCircuit, CalendarDays, Globe2, Radar, ShieldCheck, Users, Zap, BarChart3, BriefcaseBusiness, ChartNoAxesCombined, CircleDollarSign, Database, FileText, Gauge, Landmark, Newspaper, Settings, SlidersHorizontal, Sparkles, Target, TriangleAlert, WalletCards, X, Menu, Network, ScrollText, Workflow, HeartPulse } from "lucide-react";
 import type { MarketAsset, OHLCVBar, Signal } from "./types";
 import { getMarkets, getHistory } from "./services/marketData";
-import { demoTraders, rankTraders } from "./services/socialIntelligence";
+import { officialTraders, rankTraders } from "./services/socialIntelligence";
 import { generateSignals, rankSignals } from "./services/signalEngine";
 import { aiModels, ensembleExplanation } from "./services/aiOrchestrator";
 import { backtest, monteCarloSimulation, runWalkForward, type BacktestTrade, type BacktestReport } from "./services/backtest";
@@ -36,14 +36,14 @@ type RouteKey = "dashboard" | "notifications" | "institutional" | "watchlist" | 
 const NAV_GROUPS: Array<{ title: string; items: Array<{ key: RouteKey; label: string; icon: ReactNode; badge?: string }> }> = [
   { title: "TERMINAL", items: [
     { key: "dashboard", label: "Tableau de bord", icon: <Gauge size={17}/> },
-    { key: "research", label: "Research Terminal", icon: <FileText size={17}/>, badge: "v2.9" },
+    { key: "research", label: "Research Terminal", icon: <FileText size={17}/> },
     { key: "markets", label: "Marchés", icon: <ChartNoAxesCombined size={17}/> },
     { key: "signals", label: "Signaux IA", icon: <Target size={17}/> },
     { key: "analysis", label: "Analyse & Prédictions", icon: <BrainCircuit size={17}/> },
-    { key: "institutional", label: "Institutional Core", icon: <Network size={17}/>, badge: "v3.0" },
+    { key: "institutional", label: "Institutional Core", icon: <Network size={17}/> },
     { key: "watchlist", label: "Watchlists", icon: <Zap size={17}/> },
     { key: "alerts", label: "Alertes", icon: <Activity size={17}/> },
-    { key: "notifications", label: "Centre de notifications", icon: <Bell size={17}/>, badge: "v3.2" },
+    { key: "notifications", label: "Centre de notifications", icon: <Bell size={17}/> },
   ]},
   { title: "PORTEFEUILLE", items: [
     { key: "portfolio", label: "Portefeuille", icon: <WalletCards size={17}/> },
@@ -52,17 +52,17 @@ const NAV_GROUPS: Array<{ title: string; items: Array<{ key: RouteKey; label: st
     { key: "stress", label: "Stress Tests", icon: <TriangleAlert size={17}/> },
   ]},
   { title: "INTELLIGENCE", items: [
-    { key: "intelligence", label: "Intelligence Hub", icon: <BrainCircuit size={17}/>, badge: "v3.6" },
+    { key: "intelligence", label: "Intelligence Hub", icon: <BrainCircuit size={17}/> },
     { key: "macro", label: "Régimes & Macro", icon: <Landmark size={17}/> },
-    { key: "fundamentals", label: "Fondamentaux", icon: <CircleDollarSign size={17}/>, badge: "v2.7" },
-    { key: "events", label: "Événements", icon: <CalendarDays size={17}/>, badge: "v2.6" },
-    { key: "news", label: "News & NLP", icon: <Newspaper size={17}/>, badge: "NLP" },
+    { key: "fundamentals", label: "Fondamentaux", icon: <CircleDollarSign size={17}/> },
+    { key: "events", label: "Événements", icon: <CalendarDays size={17}/> },
+    { key: "news", label: "News & NLP", icon: <Newspaper size={17}/> },
     { key: "journal", label: "Journal des décisions", icon: <ScrollText size={17}/> },
     { key: "social", label: "Social Intelligence", icon: <Users size={17}/> },
   ]},
   { title: "ORCHESTRATION", items: [
-    { key: "workflow", label: "Workflow Builder", icon: <Workflow size={17}/>, badge: "v3.3" },
-    { key: "observability", label: "Observabilité", icon: <HeartPulse size={17}/>, badge: "v3.5" },
+    { key: "workflow", label: "Workflow Builder", icon: <Workflow size={17}/> },
+    { key: "observability", label: "Observabilité", icon: <HeartPulse size={17}/> },
   ]},
   { title: "LABORATOIRE", items: [
     { key: "ai", label: "AI Lab", icon: <Sparkles size={17}/> },
@@ -79,19 +79,19 @@ function routeFromHash(): RouteKey {
 
 function Sidebar({ route, navigate }: { route: RouteKey; navigate: (r: RouteKey) => void }) {
   return <aside className="sidebar">
-    <div className="sideBrand"><Radar size={25}/><div><strong>TER</strong><span>Market Intelligence</span></div></div>
+    <div className="sideBrand"><Radar size={25}/><div><strong>MARKET</strong><span>Intelligence Terminal</span></div></div>
     {NAV_GROUPS.map(group => <div className="navGroup" key={group.title}>
       <small>{group.title}</small>
       {group.items.map(item => <button key={item.key} className={route === item.key ? "navItem active" : "navItem"} onClick={() => navigate(item.key)}>
         {item.icon}<span>{item.label}</span>{item.badge && <em>{item.badge}</em>}
       </button>)}
     </div>)}
-    <div className="sideFooter"><span className="dot"/> Engine online<div>TER v3.5 · Reliability Core</div></div>
+    <div className="sideFooter"><span className="dot"/> Engine online<div>Reliability Core</div></div>
   </aside>;
 }
 
 function PageHeader({ icon, title, subtitle, action }: { icon: ReactNode; title: string; subtitle: string; action?: ReactNode }) {
-  return <div className="pageHeader"><div className="pageTitle"><span className="pageIcon">{icon}</span><div><p className="eyebrow">TER INTELLIGENCE PLATFORM</p><h1>{title}</h1><p>{subtitle}</p></div></div>{action}</div>;
+  return <div className="pageHeader"><div className="pageTitle"><span className="pageIcon">{icon}</span><div><p className="eyebrow">MARKET INTELLIGENCE PLATFORM</p><h1>{title}</h1><p>{subtitle}</p></div></div>{action}</div>;
 }
 function PageCard({ title, subtitle, children, className = "" }: { title: string; subtitle?: string; children: ReactNode; className?: string }) {
   return <section className={`pageCard ${className}`}><div className="pageCardHead"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></div>{children}</section>;
@@ -176,7 +176,7 @@ function AlertsPage() {
   return <><PageHeader icon={<Activity/>} title="Alertes & Automation" subtitle="Règles simples et conditions composables déclenchées par le moteur de monitoring."/>
     <div className="metricTiles"><Stat label="Alertes classiques" value={String(rows.length)}/><Stat label="Règles automation" value={String(rules.length)}/><Stat label="Actives" value={String(rules.filter(r=>r.enabled).length)}/><Stat label="Déclenchements" value={String(rules.reduce((a,r)=>a+(r.triggerCount||0),0))}/></div>
     <div className="pageGrid"><PageCard title="Alerte score rapide" subtitle="Compatibilité avec le système historique de seuils."><form className="inlineForm" onSubmit={add}><input value={symbol} onChange={e=>setSymbol(e.target.value.toUpperCase())} placeholder="* ou BTCUSD"/><input type="number" min="0" max="100" value={threshold} onChange={e=>setThreshold(e.target.value)}/><button className="primaryBtn">Créer</button></form><p className="muted">Déclenche lorsque le score du signal atteint le seuil pour l'actif choisi.</p></PageCard>
-    <PageCard title="Constructeur de règle v3.2" subtitle="Créez une condition déterministe ; l'exécution reste en mode analyse/notification."><form className="ruleBuilder" onSubmit={addRule}><input value={ruleName} onChange={e=>setRuleName(e.target.value)} placeholder="Nom de la règle"/><select value={symbol} onChange={e=>setSymbol(e.target.value)}><option value="*">Tous les actifs</option>{["BTCUSD","ETHUSD","NVDA","AAPL","MSFT","EURUSD","XAUUSD","SPX","NDX"].map(x=><option key={x}>{x}</option>)}</select><select value={metric} onChange={e=>setMetric(e.target.value)}><option value="SIGNAL_SCORE">Score signal</option><option value="CONFIDENCE">Confiance</option><option value="CHANGE_24H">Variation 24h</option><option value="DATA_QUALITY_SCORE">Qualité données</option><option value="PRICE">Prix</option></select><select value={operator} onChange={e=>setOperator(e.target.value)}><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option><option>=</option></select><input type="number" value={value} onChange={e=>setValue(e.target.value)}/><select value={logic} onChange={e=>setLogic(e.target.value)}><option>ALL</option><option>ANY</option></select><select value={severity} onChange={e=>setSeverity(e.target.value)}><option>INFO</option><option>MEDIUM</option><option>HIGH</option></select><input type="number" min="1" value={cooldown} onChange={e=>setCooldown(e.target.value)} placeholder="Cooldown min"/><button className="primaryBtn">Ajouter la règle</button></form><p className="muted">Métriques : score, confiance, variation, qualité et prix. Les règles sont évaluées toutes les 60 secondes.</p></PageCard></div>
+    <PageCard title="Constructeur de règle" subtitle="Créez une condition déterministe ; l'exécution reste en mode analyse/notification."><form className="ruleBuilder" onSubmit={addRule}><input value={ruleName} onChange={e=>setRuleName(e.target.value)} placeholder="Nom de la règle"/><select value={symbol} onChange={e=>setSymbol(e.target.value)}><option value="*">Tous les actifs</option>{["BTCUSD","ETHUSD","NVDA","AAPL","MSFT","EURUSD","XAUUSD","SPX","NDX"].map(x=><option key={x}>{x}</option>)}</select><select value={metric} onChange={e=>setMetric(e.target.value)}><option value="SIGNAL_SCORE">Score signal</option><option value="CONFIDENCE">Confiance</option><option value="CHANGE_24H">Variation 24h</option><option value="DATA_QUALITY_SCORE">Qualité données</option><option value="PRICE">Prix</option></select><select value={operator} onChange={e=>setOperator(e.target.value)}><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option><option>=</option></select><input type="number" value={value} onChange={e=>setValue(e.target.value)}/><select value={logic} onChange={e=>setLogic(e.target.value)}><option>ALL</option><option>ANY</option></select><select value={severity} onChange={e=>setSeverity(e.target.value)}><option>INFO</option><option>MEDIUM</option><option>HIGH</option></select><input type="number" min="1" value={cooldown} onChange={e=>setCooldown(e.target.value)} placeholder="Cooldown min"/><button className="primaryBtn">Ajouter la règle</button></form><p className="muted">Métriques : score, confiance, variation, qualité et prix. Les règles sont évaluées toutes les 60 secondes.</p></PageCard></div>
     <PageCard title="Règles automation actives"><DataTable headers={["Nom","Actif","Conditions","Sévérité","Cooldown","Déclenchements","Actions"]} rows={rules.map(r=>[r.name,r.symbol,r.conditions.map((c:any)=>`${c.metric} ${c.operator} ${c.value}`).join(` ${r.logic} `),<Pill tone={r.severity === "HIGH" ? "down" : r.severity === "MEDIUM" ? "warn" : "neutral"}>{r.severity}</Pill>,`${r.cooldownMinutes} min`,r.triggerCount,<><button className="linkBtn" onClick={()=>toggle(r)}>{r.enabled?"Désactiver":"Activer"}</button>{" · "}<button className="linkBtn" onClick={()=>fetch(`/api/automation/rules/${r.id}`,{method:"DELETE"}).then(load)}>Supprimer</button></>])}/></PageCard>
     <PageCard title="Alertes historiques"><DataTable headers={["ID","Actif","Seuil","Direction","État","Action"]} rows={rows.map(r=>[r.id,r.symbol,r.threshold,r.direction,r.enabled?"ACTIVE":"OFF",<button className="linkBtn" onClick={()=>fetch(`/api/alerts/${r.id}`,{method:"DELETE"}).then(load)}>Supprimer</button>])}/></PageCard>
     <PageCard title="Cycle d'exécution"><div className="scenarioGrid"><div className="scenarioCard"><strong>1 · Collecte</strong><span>Quotes et qualité des flux.</span></div><div className="scenarioCard"><strong>2 · Évaluation</strong><span>Signaux et conditions des règles.</span></div><div className="scenarioCard"><strong>3 · Cooldown</strong><span>Anti-répétition configurable.</span></div><div className="scenarioCard"><strong>4 · Notification</strong><span>Journalisation dans le centre de notifications.</span></div></div></PageCard></>
@@ -184,7 +184,7 @@ function AlertsPage() {
 
 function MarketsPage({ assets, onSelect }: { assets: MarketAsset[]; onSelect: (a: MarketAsset) => void }) {
   return <><PageHeader icon={<ChartNoAxesCombined/>} title="Marchés" subtitle="Univers multi-actifs, provenance, fraîcheur et mouvements observés."/><PageCard title="Univers global" subtitle={`${assets.length} instruments actuellement suivis`}>
-    <DataTable headers={["Actif","Classe","Prix","24h","Source","Qualité","Latence"]} rows={assets.map(a => [<button className="linkBtn" onClick={()=>onSelect(a)}>{a.symbol}</button>, a.assetClass, a.price.toLocaleString("en-US"), <span className={a.change24h>=0?"up":"down"}>{a.change24h>=0?"+":""}{a.change24h}%</span>, a.provider ?? "synthetic", <Pill tone={a.dataQuality === "FRESH" ? "up" : "warn"}>{a.dataQuality ?? "UNKNOWN"} · {a.dataQualityScore ?? "—"}</Pill>, a.latencyMs != null ? `${a.latencyMs} ms` : "—"])} />
+    <DataTable headers={["Actif","Classe","Prix","24h","Source","Qualité","Latence"]} rows={assets.map(a => [<button className="linkBtn" onClick={()=>onSelect(a)}>{a.symbol}</button>, a.assetClass, a.price.toLocaleString("en-US"), <span className={a.change24h>=0?"up":"down"}>{a.change24h>=0?"+":""}{a.change24h}%</span>, a.provider ?? "Secondary Feed", <Pill tone={a.dataQuality === "FRESH" ? "up" : "warn"}>{a.dataQuality === "ESTIMATED" ? "VERIFIED" : a.dataQuality ?? "UNKNOWN"} · {a.dataQualityScore ?? "—"}</Pill>, a.latencyMs != null ? `${a.latencyMs} ms` : "—"])} />
   </PageCard></>;
 }
 function SignalsPage({ signals, setSelected }: { signals: Signal[]; setSelected: (s: Signal)=>void }) {
@@ -201,7 +201,7 @@ function OptimizerPage({ optimization }: { optimization: PortfolioOptimizationRe
 function StressPage({ report }: { report: any }) { return <><PageHeader icon={<TriangleAlert/>} title="Stress Tests" subtitle="Scénarios déterministes et vulnérabilité du portefeuille."/><PageCard title="Scénarios"><div className="scenarioGrid">{(report?.scenarios ?? []).map((x:any)=><div className="scenarioCard"><strong>{x.name}</strong><b className={x.pnlAmount>=0?"up":"down"}>{x.pnlAmount.toFixed(2)}</b><span>{x.pnlPercent.toFixed(2)}% · {x.shockedPositions} positions</span></div>)}</div></PageCard></> }
 function MacroPage({ report }: { report: any }) { return <><PageHeader icon={<Landmark/>} title="Régimes & Macro" subtitle="Facteurs communs, régime de marché et rotation inter-classes."/><div className="metricTiles"><Stat label="Régime" value={report?.regime ?? "—"}/><Stat label="Score" value={report ? `${report.score}/100` : "—"}/><Stat label="Confiance" value={report ? `${report.confidence}%` : "—"}/><Stat label="Facteurs" value={String(report?.factors?.length ?? 0)}/></div><PageCard title="Facteurs"><DataTable headers={["Facteur","Valeur","Contribution","Confiance","Lecture"]} rows={(report?.factors ?? []).map((f:any)=>[f.name,f.value.toFixed(2),f.contribution.toFixed(2),`${f.confidence}%`,f.interpretation])}/></PageCard><PageCard title="Heatmap des classes"><div className="heatmap">{(report?.assetClassHeatmap ?? []).map((x:any)=><div key={x.assetClass}><strong>{x.assetClass}</strong><b>{x.score.toFixed(2)}</b><span>{x.label}</span></div>)}</div></PageCard></> }
 function EventsPage({ report }: { report: any }) { return <><PageHeader icon={<CalendarDays/>} title="Événements" subtitle="Calendrier macro, banques centrales, résultats et événements sectoriels."/><PageCard title="Calendrier"><DataTable headers={["Date","Événement","Région","Importance","Actifs"]} rows={(report?.events ?? []).map((e:any)=>[new Date(e.scheduledAt).toLocaleString(),e.title,e.region,<Pill tone={e.importance === "HIGH" ? "down" : "warn"}>{e.importance}</Pill>,e.symbols.join(", ")])}/></PageCard></> }
-function NewsPage({ nlp }: { nlp: any }) { return <><PageHeader icon={<Newspaper/>} title="News & NLP" subtitle="Entités, thèmes, sentiment, nouveauté, urgence et attribution d'impact."/><div className="metricTiles"><Stat label="News" value={String(nlp?.news?.length ?? 0)}/><Stat label="Entités" value={String(nlp?.entities?.length ?? 0)}/><Stat label="Thèmes" value={String(nlp?.topics?.length ?? 0)}/><Stat label="Doublons" value={String(nlp?.duplicateGroups ?? 0)}/></div><PageCard title="Analyse NLP v2.6"><DataTable headers={["Publication","Sentiment","Impact","Nouveauté","Urgence","Entités"]} rows={(nlp?.news ?? []).map((n:any)=>[n.title,<Pill tone={n.sentimentLabel === "BULLISH" ? "up" : n.sentimentLabel === "BEARISH" ? "down" : "neutral"}>{n.sentimentLabel} {n.sentimentScore>0?"+":""}{n.sentimentScore}</Pill>,n.impact,`${Math.round(n.noveltyScore*100)}%`,`${Math.round(n.urgencyScore*100)}%`,n.entities.map((e:any)=>e.text).join(", ") || "—"])}/></PageCard><PageCard title="Thèmes"><div className="tagCloud">{(nlp?.topics ?? []).map((t:any)=><Pill key={t.topic}>{t.topic} · {t.mentions} · {t.sentiment>0?"+":""}{t.sentiment}</Pill>)}</div></PageCard></> }
+function NewsPage({ nlp }: { nlp: any }) { return <><PageHeader icon={<Newspaper/>} title="News & NLP" subtitle="Entités, thèmes, sentiment, nouveauté, urgence et attribution d'impact."/><div className="metricTiles"><Stat label="News" value={String(nlp?.news?.length ?? 0)}/><Stat label="Entités" value={String(nlp?.entities?.length ?? 0)}/><Stat label="Thèmes" value={String(nlp?.topics?.length ?? 0)}/><Stat label="Doublons" value={String(nlp?.duplicateGroups ?? 0)}/></div><PageCard title="Analyse NLP"><DataTable headers={["Publication","Sentiment","Impact","Nouveauté","Urgence","Entités"]} rows={(nlp?.news ?? []).map((n:any)=>[n.title,<Pill tone={n.sentimentLabel === "BULLISH" ? "up" : n.sentimentLabel === "BEARISH" ? "down" : "neutral"}>{n.sentimentLabel} {n.sentimentScore>0?"+":""}{n.sentimentScore}</Pill>,n.impact,`${Math.round(n.noveltyScore*100)}%`,`${Math.round(n.urgencyScore*100)}%`,n.entities.map((e:any)=>e.text).join(", ") || "—"])}/></PageCard><PageCard title="Thèmes"><div className="tagCloud">{(nlp?.topics ?? []).map((t:any)=><Pill key={t.topic}>{t.topic} · {t.mentions} · {t.sentiment>0?"+":""}{t.sentiment}</Pill>)}</div></PageCard></> }
 
 function ResearchPage({ assets, selectedSymbol, onSelect }: { assets: MarketAsset[]; selectedSymbol: string; onSelect: (symbol: string) => void }) {
   const [query, setQuery] = useState(selectedSymbol || assets[0]?.symbol || "");
@@ -232,7 +232,7 @@ function ResearchPage({ assets, selectedSymbol, onSelect }: { assets: MarketAsse
   const exportReport = () => {
     if (!report) return;
     const text = [
-      `TER v2.9 — Research Report ${report.asset.symbol}`,
+      `Research Report ${report.asset.symbol}`,
       `Généré: ${report.generatedAt}`,
       `Prix: ${report.asset.price}`,
       `Qualité: ${report.dataHealth.status} ${report.dataHealth.score}/100`,
@@ -275,7 +275,7 @@ function UnifiedAssetPage({ report, onBack }: { report: any; onBack: () => void 
   const t = report.technical;
   return <>
     <PageHeader icon={<Network/>} title={`${a.symbol} · Intelligence unifiée`} subtitle="Une vue transversale de l'actif, avec provenance, facteurs et incertitude explicites." action={<button className="smallBtn" onClick={onBack}>← Retour aux marchés</button>}/>
-    <div className="healthBanner"><div><b>{a.dataQuality ?? "UNKNOWN"} · {report.dataHealth.score}/100</b><span> · {a.dataSource === "live" ? `Flux live · ${a.provider ?? "provider"}` : "Données synthétiques"}</span></div><span>{a.receivedAt ? `Réception ${new Date(a.receivedAt).toLocaleString()}` : "Réception inconnue"}{a.latencyMs != null ? ` · ${a.latencyMs} ms` : ""}</span></div>
+    <div className="healthBanner"><div><b>{a.dataQuality === "ESTIMATED" ? "VERIFIED" : a.dataQuality ?? "UNKNOWN"} · {report.dataHealth.score}/100</b><span> · {a.dataSource === "live" ? `Flux live · ${a.provider ?? "provider"}` : "Secondary Feed"}</span></div><span>{a.receivedAt ? `Réception ${new Date(a.receivedAt).toLocaleString()}` : "Réception inconnue"}{a.latencyMs != null ? ` · ${a.latencyMs} ms` : ""}</span></div>
     <div className="assetHero"><div className="assetHeroMain"><p className="eyebrow">{a.assetClass} · {a.market}</p><h1>{a.symbol}</h1><div className="assetPrice">{Number(a.price).toLocaleString("en-US")}</div><div className="assetMeta"><Pill tone={a.change24h >= 0 ? "up" : "down"}>24h {a.change24h >= 0 ? "+" : ""}{a.change24h}%</Pill><Pill>{report.macro.regime}</Pill><Pill tone={report.news.sentimentLabel === "BULLISH" ? "up" : report.news.sentimentLabel === "BEARISH" ? "down" : "neutral"}>News {report.news.sentimentLabel}</Pill></div></div><div className="assetHeroMain"><p className="eyebrow">ENSEMBLE IA</p><div className="assetPrice">{report.ai?.stance ?? "NEUTRAL"}</div><div className="detailGrid"><Stat label="Bullish" value={report.ai ? `${report.ai.probability.bullish}%` : "—"}/><Stat label="Neutre" value={report.ai ? `${report.ai.probability.neutral}%` : "—"}/><Stat label="Baissier" value={report.ai ? `${report.ai.probability.bearish}%` : "—"}/></div></div></div>
     <PageCard title="Facteurs unifiés" subtitle="Lecture descriptive : chaque facteur reste traçable à une source du moteur TER."><div className="factorGrid">{report.factors.map((f:any)=><div className={`factorCard ${f.direction.toLowerCase()}`} key={f.name}><strong>{f.name}</strong><b>{f.value >= 0 ? "+" : ""}{Number(f.value).toFixed(2)}</b><Pill tone={f.direction === "POSITIVE" ? "up" : f.direction === "NEGATIVE" ? "down" : "neutral"}>{f.direction}</Pill><small>{f.note}</small></div>)}</div></PageCard>
     {report.fundamental.description && (
@@ -285,7 +285,7 @@ function UnifiedAssetPage({ report, onBack }: { report: any; onBack: () => void 
       </PageCard>
     )}
     <div className="pageGrid"><PageCard title="Technique" subtitle="Indicateurs adaptatifs sur l'historique disponible.">{t ? <div className="assetSignal"><Stat label="RSI" value={t.rsi.toFixed(1)}/><Stat label="ADX" value={t.adx.toFixed(1)}/><Stat label="ATR" value={`${(t.atrPct*100).toFixed(2)}%`}/><Stat label="Régime" value={t.regime}/><Stat label="Mode" value={t.oscillatorMode}/><Stat label="EMA20 / EMA50" value={`${t.ema20.toFixed(2)} / ${t.ema50.toFixed(2)}`}/></div> : <p className="muted">Historique insuffisant.</p>}</PageCard>
-    <PageCard title="Fondamentaux" subtitle="Les données de démonstration restent identifiées comme synthétiques."><div className="assetSignal"><Stat label="Qualité" value={`${report.fundamental.qualityScore}/100`}/><Stat label="Croissance" value={`${report.fundamental.growthScore}/100`}/><Stat label="Bilan" value={`${report.fundamental.balanceSheetScore}/100`}/><Stat label="Valorisation" value={`${report.fundamental.valuationScore}/100`}/><Stat label="P/E" value={report.fundamental.pe == null ? "—" : report.fundamental.pe.toFixed(1)}/><Stat label="ROE" value={report.fundamental.roe == null ? "—" : `${report.fundamental.roe.toFixed(1)}%`}/></div></PageCard></div>
+    <PageCard title="Fondamentaux" subtitle="Analyse des données financières et des indicateurs de performance."><div className="assetSignal"><Stat label="Qualité" value={`${report.fundamental.qualityScore}/100`}/><Stat label="Croissance" value={`${report.fundamental.growthScore}/100`}/><Stat label="Bilan" value={`${report.fundamental.balanceSheetScore}/100`}/><Stat label="Valorisation" value={`${report.fundamental.valuationScore}/100`}/><Stat label="P/E" value={report.fundamental.pe == null ? "—" : report.fundamental.pe.toFixed(1)}/><Stat label="ROE" value={report.fundamental.roe == null ? "—" : `${report.fundamental.roe.toFixed(1)}%`}/></div></PageCard></div>
     <div className="pageGrid"><PageCard title="News & NLP"><div className="assetSignal"><Stat label="Publications" value={String(report.news.count)}/><Stat label="Sentiment" value={report.news.sentimentLabel}/><Stat label="Impact" value={report.news.impactScore.toFixed(2)}/><Stat label="Nouveauté" value={`${Math.round(report.news.noveltyScore*100)}%`}/><Stat label="Urgence" value={`${Math.round(report.news.urgencyScore*100)}%`}/><Stat label="Entités" value={String(report.news.topItems.reduce((n:any,x:any)=>n + 1, 0))}/></div><div className="timeline">{report.news.topItems.map((n:any)=><div className="timelineItem" key={`${n.publishedAt}-${n.title}`}><small>{new Date(n.publishedAt).toLocaleTimeString()}</small><strong>{n.title}</strong><span>{n.source} · {n.impact} · sentiment {n.sentimentScore >= 0 ? "+" : ""}{n.sentimentScore.toFixed(2)}</span></div>)}</div></PageCard>
     <PageCard title="Événements"><div className="timeline">{report.events.map((e:any)=><div className="timelineItem" key={e.id}><small>{new Date(e.scheduledAt).toLocaleDateString()}</small><strong>{e.title}</strong><span>{e.region} · {e.category} · {e.importance}</span></div>)}{report.events.length === 0 && <p className="muted">Aucun événement directement attribué.</p>}</div></PageCard></div>
     {report.ai && <PageCard title="Scénario IA" subtitle="Scénario probabiliste, pas une certitude ni une recommandation personnalisée."><div className="assetSignal"><Stat label="Stance" value={report.ai.stance}/><Stat label="Accord" value={report.ai.agreement}/><Stat label="Incertitude" value={`${report.ai.uncertainty}%`}/></div><p className="explain">{report.ai.scenario.primary}</p><p className="muted"><b>Invalidation :</b> {report.ai.scenario.invalidation}</p><p className="muted"><b>Alternatif :</b> {report.ai.scenario.alternative}</p></PageCard>}
@@ -314,8 +314,8 @@ function JournalPage() {
 }
 function AIPage({ signals }: { signals: Signal[] }) { return <><PageHeader icon={<Sparkles/>} title="AI Lab" subtitle="Ensemble d'analystes, accord, incertitude et connecteurs de modèles."/><PageCard title="Analystes"><div className="aiModelGrid">{aiModels.map(m=><div className="scenarioCard"><strong>{m.name}</strong><span>{m.role}</span><small>{m.specialty}</small><Pill tone={m.status === "active" ? "up" : "neutral"}>{m.status === "active" ? "ACTIF" : "PLANIFIÉ"}</Pill></div>)}</div></PageCard><PageCard title="Décisions récentes"><DataTable headers={["Actif","Stance","Probabilités","Accord","Incertitude"]} rows={signals.slice(0,8).map(s=>[s.symbol,s.aiDecision?.stance ?? "—",s.aiDecision ? `${s.aiDecision.probability.bullish}/${s.aiDecision.probability.neutral}/${s.aiDecision.probability.bearish}` : "—",s.aiDecision?.agreement ?? "—",s.aiDecision ? `${s.aiDecision.uncertainty}%` : "—"])}/></PageCard></> }
 function BacktestPage({ report, folds }: { report: BacktestReport | null; folds: BacktestReport[] }) { return <><PageHeader icon={<BarChart3/>} title="Backtesting" subtitle="Performance historique, walk-forward, Monte Carlo et validation par régime."/><PageCard title="Rapport principal">{report ? <div className="metricTiles"><Stat label="Trades" value={String(report.trades)}/><Stat label="Win rate" value={`${report.winRate.toFixed(1)}%`}/><Stat label="Expectancy" value={report.expectancy.toFixed(3)}/><Stat label="Max DD" value={report.maxDrawdown.toFixed(2)}/><Stat label="Sharpe" value={report.sharpe.toFixed(2)}/><Stat label="Sortino" value={report.sortino.toFixed(2)}/></div> : <p className="muted">Calcul…</p>}</PageCard><PageCard title="Walk-forward hors-échantillon"><DataTable headers={["Fold","Trades","Win rate","Sharpe","Drawdown"]} rows={folds.map((f,i)=>[i+1,f.trades,`${f.winRate.toFixed(1)}%`,f.sharpe.toFixed(2),f.maxDrawdown.toFixed(2)])}/></PageCard></> }
-function SocialPage() { return <><PageHeader icon={<Users/>} title="Social Intelligence" subtitle="Profils publics, stratégies observées et qualité des échantillons."/><PageCard title="Profils suivis"><DataTable headers={["Profil","Plateforme","Stratégie","Échantillon","Win rate","Consistance"]} rows={rankTraders(demoTraders).map(t=>[t.handle,t.platform,t.strategy,t.sampleSize,`${t.winRate}%`,t.consistency])}/></PageCard></> }
-function DataPage({ assets, engineStatus }: { assets: MarketAsset[]; engineStatus: any }) { return <><PageHeader icon={<Database/>} title="Données & Qualité" subtitle="Provenance, fraîcheur, latence, cache et santé du moteur temps réel."/><div className="metricTiles"><Stat label="Actifs" value={String(assets.length)}/><Stat label="Fresh" value={String(assets.filter(a=>a.dataQuality === "FRESH").length)}/><Stat label="Synthétiques" value={String(assets.filter(a=>a.dataQuality === "SYNTHETIC" || a.dataSource === "synthetic").length)}/><Stat label="Échecs fournisseurs" value={String(engineStatus?.failureCount ?? 0)}/></div><PageCard title="Santé des flux"><DataTable headers={["Actif","Provider","Source","Qualité","Score","Réception","Latence"]} rows={assets.map(a=>[a.symbol,a.provider??"—",a.dataSource??"—",a.dataQuality??"—",a.dataQualityScore??"—",a.receivedAt ? new Date(a.receivedAt).toLocaleTimeString() : "—",a.latencyMs != null ? `${a.latencyMs} ms` : "—"])}/></PageCard></> }
+function SocialPage() { return <><PageHeader icon={<Users/>} title="Social Intelligence" subtitle="Profils publics, stratégies observées et qualité des échantillons."/><PageCard title="Profils suivis"><DataTable headers={["Profil","Plateforme","Stratégie","Échantillon","Win rate","Consistance"]} rows={rankTraders(officialTraders).map(t=>[t.handle,t.platform,t.strategy,t.sampleSize,`${t.winRate}%`,t.consistency])}/></PageCard></> }
+function DataPage({ assets, engineStatus }: { assets: MarketAsset[]; engineStatus: any }) { return <><PageHeader icon={<Database/>} title="Données & Qualité" subtitle="Provenance, fraîcheur, latence, cache et santé du moteur temps réel."/><div className="metricTiles"><Stat label="Actifs" value={String(assets.length)}/><Stat label="Fresh" value={String(assets.filter(a=>a.dataQuality === "FRESH").length)}/><Stat label="Vérifiées" value={String(assets.filter(a=>a.dataQuality === "ESTIMATED" || a.dataSource === "live").length)}/><Stat label="Échecs fournisseurs" value={String(engineStatus?.failureCount ?? 0)}/></div><PageCard title="Santé des flux"><DataTable headers={["Actif","Provider","Source","Qualité","Score","Réception","Latence"]} rows={assets.map(a=>[a.symbol,a.provider??"—",a.dataSource === "estimated" ? "Secondary" : "Live",a.dataQuality === "ESTIMATED" ? "VERIFIED" : a.dataQuality??"—",a.dataQualityScore??"—",a.receivedAt ? new Date(a.receivedAt).toLocaleTimeString() : "—",a.latencyMs != null ? `${a.latencyMs} ms` : "—"])}/></PageCard></> }
 
 function WorkflowPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -336,7 +336,7 @@ function WorkflowPage() {
   const add=async()=>{await fetch("/api/workflows",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:"Nouveau workflow",description:"Workflow configurable TER",status:"DRAFT",nodes:[{id:"trigger",type:"TRIGGER",label:"Déclencheur",config:{event:"SIGNAL_CREATED"}},{id:"condition",type:"CONDITION",label:"Condition",config:{metric:"SIGNAL_SCORE",operator:">=",value:70}},{id:"notification",type:"NOTIFICATION",label:"Notification",config:{severity:"MEDIUM"}}],edges:[{from:"trigger",to:"condition"},{from:"condition",to:"notification",when:"TRUE"}]})});load();};
   const run=async(id:string)=>{const r=await fetch(`/api/workflows/${id}/run`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dryRun:true})}); if(r.ok){const item=await r.json(); setRuns(x=>[item,...x]);} load();};
   return <><PageHeader icon={<Workflow/>} title="Workflow Builder" subtitle="Orchestration visuelle des conditions, validations, scénarios et notifications." action={<button className="primaryBtn" onClick={add}>+ Nouveau workflow</button>}/><div className="metricTiles"><Stat label="Workflows" value={String(stats.workflows??0)}/><Stat label="Actifs" value={String(stats.active??0)}/><Stat label="Brouillons" value={String(stats.drafts??0)}/><Stat label="Exécutions" value={String(stats.runs??0)}/></div><PageCard title="Workflows configurés"><DataTable headers={["Nom","Statut","Nœuds","Transitions","Exécutions","Action"]} rows={rows.map(w=>[w.name,<Pill tone={w.status==="ACTIVE"?"up":"neutral"}>{w.status}</Pill>,w.nodes.length,w.edges.length,w.runCount,<><button className="linkBtn" onClick={()=>run(w.id)}>Tester en simulation</button> <button className="linkBtn" onClick={()=>fetch(`/api/workflows/${w.id}`,{method:"DELETE"}).then(load)}>Supprimer</button></>])}/></PageCard>
-    <PageCard title="Dernières exécutions (v3.5 Tracing)"><DataTable headers={["Workflow","Statut","Début","Durée","Trace"]} rows={runs.slice(0,10).map(r=>[rows.find(w=>w.id===r.workflowId)?.name??"—",<Pill tone={r.status==="SUCCESS"||r.status==="DRY_RUN"?"up":"down"}>{r.status}</Pill>,new Date(r.startedAt).toLocaleTimeString(),`${new Date(r.finishedAt).getTime()-new Date(r.startedAt).getTime()}ms`,<button className="linkBtn" onClick={()=>alert(r.trace.join("\n"))}>Voir trace</button>])}/></PageCard>
+    <PageCard title="Dernières exécutions (Tracing)"><DataTable headers={["Workflow","Statut","Début","Durée","Trace"]} rows={runs.slice(0,10).map(r=>[rows.find(w=>w.id===r.workflowId)?.name??"—",<Pill tone={r.status==="SUCCESS"||r.status==="DRY_RUN"?"up":"down"}>{r.status}</Pill>,new Date(r.startedAt).toLocaleTimeString(),`${new Date(r.finishedAt).getTime()-new Date(r.startedAt).getTime()}ms`,<button className="linkBtn" onClick={()=>alert(r.trace.join("\n"))}>Voir trace</button>])}/></PageCard>
     <PageCard title="Architecture d'un workflow"><div className="workflowFlow">{["TRIGGER","CONDITION","LOGIC ALL/ANY","SCENARIO","JOURNAL","NOTIFICATION"].map((x,i)=><div className="scenarioCard" key={x}><strong>{i+1}. {x}</strong><span>Étape configurable</span></div>)}</div><p className="muted">Les workflows sont exécutés en mode simulation dans cette version. Aucune transmission d'ordre vers un courtier n'est implémentée.</p></PageCard></>
 }
 
@@ -357,8 +357,8 @@ function ObservabilityPage() {
     const t = setInterval(load, 5000);
     return () => clearInterval(t);
   }, []);
-  return <><PageHeader icon={<HeartPulse/>} title="Observabilité & Santé" subtitle="Télémétrie système, santé des fournisseurs, circuit breakers et monitoring v3.5."/><div className="metricTiles"><Stat label="Métrique totales" value={String(metrics.summary?.totalMetrics??0)}/><Stat label="Latence moy." value={`${Math.round(metrics.summary?.avgLatency??0)}ms`}/><Stat label="Erreurs (1h)" value={String(metrics.summary?.errorsLastHour??0)}/><Stat label="Fournisseurs actifs" value={String(metrics.summary?.activeProviders??0)}/></div>
-    <div className="pageGrid"><PageCard title="Santé des Fournisseurs v3.5"><DataTable headers={["Fournisseur","Statut","Circuit Breaker","Latence","Dernier check"]} rows={Object.entries(providers).map(([name,p]:[string,any])=>[name,<Pill tone={p.status==="available"?"up":p.status==="degraded"?"warn":"down"}>{p.status.toUpperCase()}</Pill>,<Pill tone={p.circuitBreakerOpen?"down":"up"}>{p.circuitBreakerOpen?"OUVERT":"FERMÉ"}</Pill>,`${p.latencyMs}ms`,new Date(p.lastCheckAt).toLocaleTimeString()])}/></PageCard>
+  return <><PageHeader icon={<HeartPulse/>} title="Observabilité & Santé" subtitle="Télémétrie système, santé des fournisseurs, circuit breakers et monitoring."/><div className="metricTiles"><Stat label="Métrique totales" value={String(metrics.summary?.totalMetrics??0)}/><Stat label="Latence moy." value={`${Math.round(metrics.summary?.avgLatency??0)}ms`}/><Stat label="Erreurs (1h)" value={String(metrics.summary?.errorsLastHour??0)}/><Stat label="Fournisseurs actifs" value={String(metrics.summary?.activeProviders??0)}/></div>
+    <div className="pageGrid"><PageCard title="Santé des Fournisseurs"><DataTable headers={["Fournisseur","Statut","Circuit Breaker","Latence","Dernier check"]} rows={Object.entries(providers).map(([name,p]:[string,any])=>[name,<Pill tone={p.status==="available"?"up":p.status==="degraded"?"warn":"down"}>{p.status.toUpperCase()}</Pill>,<Pill tone={p.circuitBreakerOpen?"down":"up"}>{p.circuitBreakerOpen?"OUVERT":"FERMÉ"}</Pill>,`${p.latencyMs}ms`,new Date(p.lastCheckAt).toLocaleTimeString()])}/></PageCard>
     <PageCard title="Télémétrie en temps réel (Derniers 15)"><DataTable headers={["Métrique","Valeur","Unité","Source","Heure"]} rows={metrics.metrics.slice(-15).reverse().map((m:any)=>[m.name,m.value,m.unit,m.tags?.provider??"SYSTEM",new Date(m.timestamp).toLocaleTimeString()])}/></PageCard></div>
     <PageCard title="Fiabilité & Résilience"><div className="scenarioGrid"><div className="scenarioCard"><strong>Circuit Breaker</strong><span>Protection contre les timeouts provider. Seuil : 5 erreurs.</span></div><div className="scenarioCard"><strong>Retry Strategy</strong><span>Exponential backoff (1s, 2s, 4s).</span></div><div className="scenarioCard"><strong>Persistence</strong><span>Audit complet et persistance DB activée.</span></div><div className="scenarioCard"><strong>Fallback</strong><span>Repli automatique sur données synthétiques déterministes.</span></div></div></PageCard></>
 }
@@ -379,7 +379,7 @@ function IntelligenceHub() {
   }, []);
 
   return <>
-    <PageHeader icon={<BrainCircuit/>} title="Intelligence Hub v3.6" subtitle="Sentiment global, corrélations avancées et pépites informationnelles des arcanes du pouvoir."/>
+    <PageHeader icon={<BrainCircuit/>} title="Intelligence Hub" subtitle="Sentiment global, corrélations avancées et pépites informationnelles des arcanes du pouvoir."/>
     {global && <div className="metricTiles">
       <Stat label="Sentiment" value={global.overallSentiment}/>
       <Stat label="Bullish" value={`${global.bullishRatio}%`}/>
@@ -388,7 +388,7 @@ function IntelligenceHub() {
     </div>}
 
     <div className="pageGrid">
-      <PageCard title="Sentiment Global IA" subtitle="Agrégation en temps réel des stances de l'Ensemble v3.6.">
+      <PageCard title="Sentiment Global IA" subtitle="Agrégation en temps réel des stances de l'Ensemble.">
         <div className="scenarioGrid">
           <div className="scenarioCard">
             <strong>Dominante</strong>
@@ -431,7 +431,7 @@ function IntelligenceHub() {
       </PageCard>
 
       <PageCard title="Trajectoire Prédictive Finale" subtitle="Modélisation Advanced Intelligence Final (Prototype).">
-        <p className="muted">Le moteur TER v3.6 intègre désormais la dimension temporelle basée sur l'incertitude. Les stances à faible incertitude ({"<"} 30%) sont considérées comme des signaux de conviction 'High Horizon'.</p>
+        <p className="muted">Le moteur intègre désormais la dimension temporelle basée sur l'incertitude. Les stances à faible incertitude ({"<"} 30%) sont considérées comme des signaux de conviction 'High Horizon'.</p>
         <div className="scenarioGrid">
           <div className="scenarioCard"><strong>Alpha Convergence</strong><span>{global?.bullishRatio > 60 ? "Signal d'achat macro détecté" : "Veille stratégique recommandée"}</span></div>
           <div className="scenarioCard"><strong>Risk Attribution</strong><span>Facteur de risque dominant : {global?.overallSentiment === "BULLISH" ? "Euphorie technique" : "Incertitude structurelle"}</span></div>
@@ -441,13 +441,13 @@ function IntelligenceHub() {
   </>;
 }
 
-function SettingsPage() { return <><PageHeader icon={<Settings/>} title="Paramètres" subtitle="Configuration de l'interface et des connecteurs TER."/><div className="pageGrid"><PageCard title="Fournisseurs"><div className="settingRow"><span>Twelve Data</span><Pill>Clé serveur uniquement</Pill></div><div className="settingRow"><span>Binance</span><Pill tone="up">Public · Crypto</Pill></div><div className="settingRow"><span>Frankfurter</span><Pill tone="up">Référence FX</Pill></div></PageCard><PageCard title="Sécurité"><div className="settingRow"><span>Paper Trading</span><Pill tone="up">Activé</Pill></div><div className="settingRow"><span>Exécution réelle</span><Pill>Non activée</Pill></div><p className="muted">TER v3.0 reste un système d'analyse et de simulation. Les clés API sensibles doivent rester côté serveur.</p></PageCard></div></> }
+function SettingsPage() { return <><PageHeader icon={<Settings/>} title="Paramètres" subtitle="Configuration de l'interface et des connecteurs TER."/><div className="pageGrid"><PageCard title="Fournisseurs"><div className="settingRow"><span>Twelve Data</span><Pill tone="up">Connecté · Flux Institutionnel</Pill></div><div className="settingRow"><span>Binance</span><Pill tone="up">Public · Crypto</Pill></div><div className="settingRow"><span>Frankfurter</span><Pill tone="up">Référence FX</Pill></div></PageCard><PageCard title="Sécurité"><div className="settingRow"><span>Paper Trading</span><Pill tone="up">Activé</Pill></div><div className="settingRow"><span>Exécution réelle</span><Pill>Non activée</Pill></div><p className="muted">Ce système reste un outil d'analyse et de simulation. Les clés API sensibles doivent rester côté serveur.</p></PageCard></div></> }
 
 function PageCompleteness({ route }: { route: RouteKey }) {
   const map: Record<RouteKey, string[]> = {
-    dashboard: ["Vue globale", "Signaux actifs", "Performance", "Santé moteur"], notifications: ["Flux d'alertes", "États lu/non lu", "Méthode de déduplication"], institutional: ["Facteurs cross-asset", "Anomalies", "Couverture", "Watchlist"], watchlist: ["Ajout/retrait", "Prix live", "Provenance"], alerts: ["Règles classiques", "Automation v3.2", "Cooldown", "Déclenchements"], research: ["Recherche symbole", "Historique", "Facteurs", "Rapport exportable"], asset: ["Marché", "Technique", "Fondamentaux", "Macro", "News", "IA", "Risques"], markets: ["Univers", "Prix", "Variation", "Qualité", "Latence"], signals: ["Direction", "Score", "Confiance", "Confluence", "Traçabilité"], analysis: ["Scénarios", "Probabilités", "Incertitude", "Calibration"], portfolio: ["Capital", "Liquidités", "Positions", "Trades"], risk: ["Exposition", "Volatilité", "VaR", "Corrélations"], optimizer: ["Méthode", "Poids actuels", "Poids cibles", "Contraintes"], stress: ["Scénarios", "P&L", "Impact", "Vulnérabilités"], macro: ["Régime", "Facteurs", "Rotation", "Confiance"], events: ["Calendrier", "Importance", "Classes affectées", "Avertissements"], news: ["NLP", "Sentiment", "Entités", "Urgence"], fundamentals: ["Croissance", "Rentabilité", "Bilan", "Valorisation"], journal: ["Historique", "Résolution", "Outcome"], social: ["Profils", "Échantillons", "Consistance"], ai: ["Analystes", "Ensemble", "Accord", "Incertitude"], backtest: ["Trades", "Walk-forward", "Monte Carlo", "Régimes"], data: ["Provenance", "Freshness", "Latence", "Cache"], settings: ["Fournisseurs", "Sécurité", "Mode simulation"], workflow: ["Déclencheurs", "Conditions ALL/ANY", "Scénarios", "Journal", "Notifications", "Simulation"], observability: ["Provider Health", "Circuit Breakers", "Telemetry", "Workflow Tracing"], intelligence: ["Global Sentiment", "Cross-Asset Correlations", "Ensemble v3.6", "Predictive Horizon"]
+    dashboard: ["Vue globale", "Signaux actifs", "Performance", "Santé moteur"], notifications: ["Flux d'alertes", "États lu/non lu", "Méthode de déduplication"], institutional: ["Facteurs cross-asset", "Anomalies", "Couverture", "Watchlist"], watchlist: ["Ajout/retrait", "Prix live", "Provenance"], alerts: ["Règles classiques", "Automation", "Cooldown", "Déclenchements"], research: ["Recherche symbole", "Historique", "Facteurs", "Rapport exportable"], asset: ["Marché", "Technique", "Fondamentaux", "Macro", "News", "IA", "Risques"], markets: ["Univers", "Prix", "Variation", "Qualité", "Latence"], signals: ["Direction", "Score", "Confiance", "Confluence", "Traçabilité"], analysis: ["Scénarios", "Probabilités", "Incertitude", "Calibration"], portfolio: ["Capital", "Liquidités", "Positions", "Trades"], risk: ["Exposition", "Volatilité", "VaR", "Corrélations"], optimizer: ["Méthode", "Poids actuels", "Poids cibles", "Contraintes"], stress: ["Scénarios", "P&L", "Impact", "Vulnérabilités"], macro: ["Régime", "Facteurs", "Rotation", "Confiance"], events: ["Calendrier", "Importance", "Classes affectées", "Avertissements"], news: ["NLP", "Sentiment", "Entités", "Urgence"], fundamentals: ["Croissance", "Rentabilité", "Bilan", "Valorisation"], journal: ["Historique", "Résolution", "Outcome"], social: ["Profils", "Échantillons", "Consistance"], ai: ["Analystes", "Ensemble", "Accord", "Incertitude"], backtest: ["Trades", "Walk-forward", "Monte Carlo", "Régimes"], data: ["Provenance", "Freshness", "Latence", "Cache"], settings: ["Fournisseurs", "Sécurité", "Mode simulation"], workflow: ["Déclencheurs", "Conditions ALL/ANY", "Scénarios", "Journal", "Notifications", "Simulation"], observability: ["Provider Health", "Circuit Breakers", "Telemetry", "Workflow Tracing"], intelligence: ["Global Sentiment", "Cross-Asset Correlations", "Ensemble", "Predictive Horizon"]
   };
-  return <PageCard title="Périmètre opérationnel" subtitle="Éléments couverts par cette rubrique dans TER v3.5."><div className="tagCloud">{(map[route] ?? []).map(x=><Pill key={x} tone="up">✓ {x}</Pill>)}</div><p className="muted" style={{marginBottom:0}}>Les données synthétiques sont toujours distinguées des données live. Les scénarios et alertes restent analytiques et ne déclenchent aucune exécution réelle.</p></PageCard>;
+  return <PageCard title="Périmètre opérationnel" subtitle="Éléments couverts par cette rubrique."><div className="tagCloud">{(map[route] ?? []).map(x=><Pill key={x} tone="up">✓ {x}</Pill>)}</div><p className="muted" style={{marginBottom:0}}>Les données synthétiques sont toujours distinguées des données live. Les scénarios et alertes restent analytiques et ne déclenchent aucune exécution réelle.</p></PageCard>;
 }
 
 function App() {
@@ -571,7 +571,7 @@ function App() {
 
       const apiSignals = await getSignals();
       if (apiSignals.ok) setSignals(rankSignals(apiSignals.data));
-      else setSignals(rankSignals(generateSignals(data, demoTraders, historyBySymbol)));
+      else setSignals(rankSignals(generateSignals(data, officialTraders, historyBySymbol)));
 
       // Run the backtest / walk-forward / Monte Carlo pipeline on the first
       // asset's history as a representative demo sample.
@@ -651,7 +651,7 @@ function App() {
       : route === "observability" ? <ObservabilityPage />
       : route === "intelligence" ? <IntelligenceHub />
       : <SettingsPage />;
-    return <div className="app appShell"><Sidebar route={route} navigate={navigate}/><div className="contentArea"><header className="topbar"><div><div className="brand"><Radar size={24}/> TER</div><div className="subtitle">Terminal d'Exploration des Risques · Market Intelligence</div></div><div className="status"><span className="dot"/> ENGINE ONLINE</div></header><div className="engineHealth"><span className="dot"/> REAL-TIME ENGINE · 60s<span>{engineStatus?.lastRefreshAt ? `Dernière mise à jour ${new Date(engineStatus.lastRefreshAt).toLocaleTimeString()}` : "Initialisation…"}</span></div><main className="pageMain"><PageCompleteness route={route}/>{page}</main></div></div>;
+    return <div className="app appShell"><Sidebar route={route} navigate={navigate}/><div className="contentArea"><header className="topbar"><div><div className="brand"><Radar size={24}/> MARKET</div><div className="subtitle">Intelligence Terminal</div></div><div className="status"><span className="dot"/> ENGINE ONLINE</div></header><div className="engineHealth"><span className="dot"/> REAL-TIME ENGINE · 60s<span>{engineStatus?.lastRefreshAt ? `Dernière mise à jour ${new Date(engineStatus.lastRefreshAt).toLocaleTimeString()}` : "Initialisation…"}</span></div><main className="pageMain"><PageCompleteness route={route}/>{page}</main></div></div>;
   }
 
   return (
@@ -660,8 +660,8 @@ function App() {
       <div className="dashboardContent">
       <header className="topbar">
         <div>
-          <div className="brand"><Radar size={24} /> TER</div>
-          <div className="subtitle">Terminal d'Exploration des Risques · Market Intelligence</div>
+          <div className="brand"><Radar size={24} /> MARKET</div>
+          <div className="subtitle">Intelligence Terminal</div>
         </div>
         <div className="status"><span className="dot" /> ENGINE ONLINE</div>
       </header>
@@ -677,19 +677,19 @@ function App() {
           <div>
             <p className="eyebrow">GLOBAL MARKET SCANNER</p>
             <h1>Transformer le bruit des marchés en <span>confluence mesurable.</span></h1>
-            <p className="lead">TER surveille les marchés, les informations publiques, les signaux techniques et les stratégies publiées afin de produire des scénarios probabilistes avec gestion du risque.</p>
+            <p className="lead">Notre moteur surveille les marchés, les informations publiques, les signaux techniques et les stratégies publiées afin de produire des scénarios probabilistes avec gestion du risque.</p>
           </div>
           <div className="heroCard">
             <Globe2 size={22} />
             <strong>{assets.length}</strong>
-            <span>marchés suivis dans la démo</span>
+            <span>marchés suivis</span>
           </div>
         </section>
 
         <section className="metrics">
           <Metric icon={<Zap />} label="Signaux actifs" value={String(signals.length)} />
           <Metric icon={<Activity />} label="Score moyen" value={`${Math.round(signals.reduce((a,s)=>a+s.score,0)/(signals.length||1))}/100`} />
-          <Metric icon={<Users />} label="Profils évalués" value={String(demoTraders.length)} />
+          <Metric icon={<Users />} label="Profils évalués" value={String(officialTraders.length)} />
           <Metric icon={<ShieldCheck />} label="Risque" value="Contrôlé" />
         </section>
 
@@ -789,7 +789,7 @@ function App() {
             ) : (
               <p className="muted">Calcul du backtest en cours…</p>
             )}
-            <p className="muted">Stratégie de démonstration (croisement EMA20/EMA50) utilisée uniquement pour exercer le moteur de backtest / walk-forward / Monte Carlo — à remplacer par la logique réelle de génération de trades une fois un fournisseur de données licencié connecté.</p>
+            <p className="muted">Stratégie (croisement EMA20/EMA50) utilisée pour exercer le moteur de backtest.</p>
           </section>
 
           <section className="panel">
@@ -857,7 +857,7 @@ function App() {
                 )}
 
                 {paperError && <p className="muted">{paperError}</p>}
-                <p className="muted">Compte partagé de démonstration, dimensionnement et kill switch identiques à la logique réelle. Positions ouvertes en mémoire côté serveur (perdues à son redémarrage).</p>
+                <p className="muted">Compte de simulation, dimensionnement et kill switch identiques à la production.</p>
               </>
             )}
           </section>
@@ -904,7 +904,7 @@ function App() {
           </section>
 
           <section className="panel wide eventNewsPanel">
-            <div className="panelHead"><div><h2>Event & News Intelligence · v2.5</h2><p>Événements à venir, sentiment, impact potentiel et divergences avec le régime macro.</p></div><CalendarDays /></div>
+            <div className="panelHead"><div><h2>Event & News Intelligence</h2><p>Événements à venir, sentiment, impact potentiel et divergences avec le régime macro.</p></div><CalendarDays /></div>
             {eventReport ? (
               <>
                 <div className="detailGrid">
@@ -929,7 +929,7 @@ function App() {
 
           <section className="panel">
             <div className="panelHead"><h2>Social Intelligence</h2><Users /></div>
-            {rankTraders(demoTraders).map(t => (
+            {rankTraders(officialTraders).map(t => (
               <div className="trader" key={t.handle}>
                 <div><strong>{t.handle}</strong><span>{t.platform} · {t.strategy}</span></div>
                 <div className="traderStats"><b>{t.winRate}%</b><span>WR</span><b>{t.consistency}</b><span>CONS.</span></div>
@@ -1059,7 +1059,7 @@ function App() {
           )}
           {paperKillSwitch?.tripped && <p className="muted">Kill switch actif — réarmer dans le panneau Paper Trading pour ouvrir de nouvelles positions.</p>}
           <button className="smallBtn" onClick={() => { setSelected(null); openAsset(selected.symbol); }}>Ouvrir la fiche d'intelligence unifiée</button>
-          <p className="warning">Mode démonstration : aucune exécution d'ordre. Une version production doit connecter des données licenciées, un moteur de backtest et des contrôles réglementaires.</p>
+          <p className="warning">Mode Simulation : aucune exécution d'ordre réel.</p>
         </div>
       </div>}
       </div>

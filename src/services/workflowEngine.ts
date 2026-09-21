@@ -26,14 +26,14 @@ export function updateWorkflow(id: string, patch: Partial<Pick<Workflow, "name"|
 export function deleteWorkflow(id: string) { const i = workflows.findIndex(x => x.id === id); if (i < 0) return false; workflows.splice(i, 1); return true; }
 
 /**
- * Functional traversal for v3.5 Tracing.
+ * Functional traversal for Tracing.
  * Evaluates the workflow logic and records timing per node.
  */
 export function runWorkflow(id: string, dryRun = true, inputContext: Record<string, any> = {}): WorkflowRun | null {
   const wf = workflows.find(x => x.id === id);
   if (!wf) return null;
   const started = new Date();
-  const trace: string[] = [`v3.5 Tracing Start: ${wf.name}`, `Mode: ${dryRun ? "DRY_RUN" : "LIVE"}`];
+  const trace: string[] = [`Tracing Start: ${wf.name}`, `Mode: ${dryRun ? "DRY_RUN" : "LIVE"}`];
   const nodeMetrics: Record<string, number> = {};
 
   let currentNodeId = wf.nodes.find(n => n.type === "TRIGGER")?.id;

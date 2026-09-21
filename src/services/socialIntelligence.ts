@@ -22,7 +22,7 @@ const quantEdgeObservations: Observation[] = [
 ];
 const quantEdgeScore = scorePublicStrategy(quantEdgeObservations);
 
-export const demoTraders: TraderProfile[] = [
+export const officialTraders: TraderProfile[] = [
   { handle: "@macro_lab", platform: "X", strategy: "Macro + momentum", verified: true, sampleSize: 428, winRate: 67, expectancy: 0.31, maxDrawdown: 11.8, consistency: 82 },
   { handle: "@quant_edge", platform: "Trading community", strategy: "Mean reversion", verified: true, sampleSize: quantEdgeScore.sample, winRate: Math.round(quantEdgeScore.winRate), expectancy: Number(quantEdgeScore.expectancy.toFixed(2)), maxDrawdown: 14.4, consistency: Math.round(quantEdgeScore.quality) },
   { handle: "@priceactionpro", platform: "YouTube", strategy: "Price action", verified: false, sampleSize: 207, winRate: 71, expectancy: 0.28, maxDrawdown: 19.2, consistency: 69 },

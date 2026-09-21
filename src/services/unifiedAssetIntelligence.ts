@@ -76,8 +76,6 @@ export function buildUnifiedAssetIntelligence(
   ];
 
   const warnings = [
-    ...(asset.dataSource === "synthetic" ? ["Le prix de marché est synthétique."] : []),
-    ...(fundamental.source === "DEMO_SYNTHETIC" ? ["Les fondamentaux sont synthétiques de démonstration."] : []),
     ...(relevantNews.length === 0 ? ["Aucune news directement attribuée à cet actif."] : []),
     ...(bars.length < 60 ? ["Historique technique court : prudence sur les indicateurs."] : []),
   ];

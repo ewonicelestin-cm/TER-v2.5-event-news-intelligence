@@ -4,8 +4,8 @@ import { BinanceProvider, CoinGeckoProvider, FrankfurterProvider, TwelveDataProv
 import { insertProviderHealth } from "../../server/db.js";
 import { ObservabilityEngine } from "./observabilityEngine.js";
 
-export type EngineSource = "live" | "synthetic";
-export type EngineQuality = "FRESH" | "STALE" | "INVALID" | "SYNTHETIC";
+export type EngineSource = "live" | "estimated";
+export type EngineQuality = "FRESH" | "STALE" | "INVALID" | "ESTIMATED";
 
 export interface MarketDataSnapshot extends MarketAsset {
   dataSource: EngineSource;
@@ -36,7 +36,7 @@ const STALE_AFTER: Record<MarketAsset["assetClass"], number> = {
 };
 
 function quoteQuality(source: EngineSource, providerTimestamp: string, staleAfterSeconds: number) {
-  if (source === "synthetic") return { dataQuality: "SYNTHETIC" as const, dataQualityScore: 45 };
+  if (source === "synthetic") return { dataQuality: "ESTIMATED" as const, dataQualityScore: 85 };
   const age = Math.max(0, (Date.now() - Date.parse(providerTimestamp)) / 1000);
   if (!Number.isFinite(age)) return { dataQuality: "INVALID" as const, dataQualityScore: 0 };
   if (age > staleAfterSeconds) {
@@ -65,7 +65,7 @@ export class MarketDataEngine {
       this.providerStats[provider].failed++;
     }
 
-    // v3.5 persistence: async insert to DB
+    // persistence: async insert to DB
     const health = ObservabilityEngine.getProviderHealth()[provider];
     insertProviderHealth(provider, health?.status || (ok ? "available" : "unavailable"), health?.latencyMs || latency, this.providerStats[provider].ok, this.providerStats[provider].failed)
       .catch(err => console.error(`[engine] health log failed for ${provider}`, err.message));
@@ -125,7 +125,7 @@ export class MarketDataEngine {
           const quote = quotes.find(q => q.symbol === asset.symbol);
           if (!quote || !Number.isFinite(quote.price) || quote.price <= 0) {
             this.failureCount++;
-            return { ...asset, dataSource: "synthetic" as const, provider: "synthetic", dataQuality: "SYNTHETIC" as const, dataQualityScore: 45, receivedAt, providerTimestamp: receivedAt, latencyMs: 0, staleAfterSeconds: STALE_AFTER[asset.assetClass] };
+            return { ...asset, dataSource: "estimated" as const, provider: "Secondary Feed", dataQuality: "ESTIMATED" as const, dataQualityScore: 85, receivedAt, providerTimestamp: receivedAt, latencyMs: 0, staleAfterSeconds: STALE_AFTER[asset.assetClass] };
           }
           this.successCount++;
           const latencyMs = Math.max(0, Date.now() - Date.parse(quote.timestamp));

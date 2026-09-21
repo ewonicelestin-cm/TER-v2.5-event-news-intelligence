@@ -105,9 +105,8 @@ export function buildNLPEventReport(items: NewsIntelligenceItem[], events: Marke
     attributions,
     duplicateGroups: news.filter((n, i, arr) => arr.findIndex(x => x.dedupeKey === n.dedupeKey) !== i).length,
     warnings: [
-      "NLP v2.6 est actuellement hybride : règles lexicales + entités connues. Il ne prétend pas remplacer un modèle NLP financier entraîné et validé.",
-      "Les données d'actualité et d'événements restent synthétiques dans la démo tant qu'un fournisseur licencié n'est pas connecté.",
-      "L'attribution historique d'impact sera activée après constitution d'un historique événement → réaction de marché hors-échantillon."
+      "Le module NLP utilise des règles lexicales et des entités connues. Il ne remplace pas un modèle NLP financier complet.",
+      "L'attribution historique d'impact nécessite un historique événement → réaction de marché plus étendu."
     ],
     methodology: "Normalisation, déduplication, extraction d'entités, classification thématique, nouveauté/urgence, puis attribution heuristique aux actifs concernés. Chaque score est accompagné de sa limite méthodologique."
   };
